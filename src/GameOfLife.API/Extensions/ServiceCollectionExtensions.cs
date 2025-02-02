@@ -23,6 +23,7 @@ namespace GameOfLife.API.Extensions
         private static void AddServices(IServiceCollection services)
         {
             services.AddSingleton<IGameOfLifeService, GameOfLifeService>();
+            services.AddSingleton<IGameOfLifeComputeService, GameOfLifeComputeService>();
         }
 
         private static void AddRepositories(IServiceCollection services)

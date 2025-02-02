@@ -3,9 +3,9 @@
     public class GameOfLifeBoard
     {
         public Guid Id { get; set; }
-        public bool[][] Board { get; set; }
+        public HashSet<(int, int)> Board { get; set; }
 
-        public GameOfLifeBoard(bool[][] board)
+        public GameOfLifeBoard(HashSet<(int, int)> board)
         {
             Id = Guid.NewGuid();
             Board = board;
