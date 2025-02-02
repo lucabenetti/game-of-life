@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B5139EE0-BCAD-401B-BE7D-02F2EFFDBF40}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F793DE6D-489E-4586-89A8-15438C0AFC4F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{27648360-8EAC-4A61-B53C-6D06E8CFDD61}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{02452507-F6A7-44BB-886C-E0FC019A95F8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{AF6C0426-7167-41B5-8CEC-0AC1C0EB512A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{54832E69-FDF4-43B3-A1AB-E2339036AFC1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.API", "GameOfLife.API\GameOfLife.API.csproj", "{ACD684EA-B542-443F-B4A5-915918EF10DB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ACD684EA-B542-443F-B4A5-915918EF10DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACD684EA-B542-443F-B4A5-915918EF10DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACD684EA-B542-443F-B4A5-915918EF10DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACD684EA-B542-443F-B4A5-915918EF10DB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AF6C0426-7167-41B5-8CEC-0AC1C0EB512A} = {F793DE6D-489E-4586-89A8-15438C0AFC4F}
+		{54832E69-FDF4-43B3-A1AB-E2339036AFC1} = {F793DE6D-489E-4586-89A8-15438C0AFC4F}
+		{ACD684EA-B542-443F-B4A5-915918EF10DB} = {AF6C0426-7167-41B5-8CEC-0AC1C0EB512A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C309A467-9C56-41A5-B6C2-96D5C587825C}
+	EndGlobalSection
+EndGlobal
