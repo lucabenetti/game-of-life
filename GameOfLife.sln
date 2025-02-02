@@ -18,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{AF6C0426-716
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{54832E69-FDF4-43B3-A1AB-E2339036AFC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.API", "GameOfLife.API\GameOfLife.API.csproj", "{ACD684EA-B542-443F-B4A5-915918EF10DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.API", "src\GameOfLife.API\GameOfLife.API.csproj", "{ACD684EA-B542-443F-B4A5-915918EF10DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

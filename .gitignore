@@ -4,3 +4,5 @@
 
 /.vs/GameOfLife
 /GameOfLife.API/obj
+/.vs/ProjectEvaluation
+/src/GameOfLife.API/obj
