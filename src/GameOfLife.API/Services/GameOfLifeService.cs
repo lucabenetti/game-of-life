@@ -7,39 +7,42 @@ namespace GameOfLife.API.Services
 {
     public class GameOfLifeService : IGameOfLifeService
     {
-        private readonly IGameOfLifeRepository _gameOfLifeRepository;
-        private readonly IGameOfLifeComputeService _gameOfLifeComputeService;
+        private readonly IGameOfLifeRepository _repository;
+        private readonly IGameOfLifeComputeService _computeService;
 
-        public GameOfLifeService(IGameOfLifeRepository gameOfLifeRepository, IGameOfLifeComputeService gameOfLifeComputeService)
+        public GameOfLifeService(IGameOfLifeRepository repository, IGameOfLifeComputeService computeService)
         {
-            _gameOfLifeRepository = gameOfLifeRepository;
-            _gameOfLifeComputeService = gameOfLifeComputeService;
+            _repository = repository;
+            _computeService = computeService;
         }
 
-        public async Task<Guid> UploadBoard(HashSet<(int, int)> board)
+        public async Task<Guid> UploadBoard(bool[][] board)
         {
             var gameBoard = new GameOfLifeBoard(board);
-            await _gameOfLifeRepository.SaveBoard(gameBoard);
+            await _repository.SaveBoard(gameBoard);
             return gameBoard.Id;
         }
 
-        public async Task<HashSet<(int, int)>?> GetNextState(Guid id)
+        public async Task<bool[][]> GetNextState(Guid id)
         {
-            var gameBoard = await _gameOfLifeRepository.GetBoard(id);
-            if (gameBoard == null)
+            var gameBoard = await _repository.GetBoard(id);
+            if (gameBoard == null) return null;
+
+            // If all cells are dead, return immediately (optional)
+            if (IsBoardEmpty(gameBoard.Board))
             {
-                return null;
+                return gameBoard.Board;
             }
 
-            var nextState = _gameOfLifeComputeService.ComputeNextState(gameBoard.Board);
+            var nextState = _computeService.ComputeNextState(gameBoard.Board);
             gameBoard.Board = nextState;
-            await _gameOfLifeRepository.SaveBoard(gameBoard);
+            await _repository.SaveBoard(gameBoard);
             return nextState;
         }
 
         public async Task<FinalStateResultDto> GetFinalState(Guid id, int maxAttempts)
         {
-            var gameBoard = await _gameOfLifeRepository.GetBoard(id);
+            var gameBoard = await _repository.GetBoard(id);
             if (gameBoard == null)
             {
                 return new FinalStateResultDto { Board = null, Completed = false };
@@ -49,17 +52,30 @@ namespace GameOfLife.API.Services
 
             for (int i = 0; i < maxAttempts; i++)
             {
-                int hash = _gameOfLifeComputeService.GetBoardHash(gameBoard.Board);
+                int hash = _computeService.GetBoardHash(gameBoard.Board);
                 if (seenStates.Contains(hash))
                 {
                     return new FinalStateResultDto { Board = gameBoard.Board, Completed = true };
                 }
 
                 seenStates.Add(hash);
-                gameBoard.Board = _gameOfLifeComputeService.ComputeNextState(gameBoard.Board);
+                gameBoard.Board = _computeService.ComputeNextState(gameBoard.Board);
             }
 
             return new FinalStateResultDto { Board = null, Completed = false };
+        }
+
+        private bool IsBoardEmpty(bool[][] board)
+        {
+            foreach (var row in board)
+            {
+                if (row.Any(cell => cell)) 
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

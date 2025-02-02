@@ -4,50 +4,60 @@ namespace GameOfLife.API.Services
 {
     public class GameOfLifeComputeService : IGameOfLifeComputeService
     {
-        private readonly HashSet<(int, int)> _nextStateBuffer = new();
-
-        public HashSet<(int, int)> ComputeNextState(HashSet<(int, int)> aliveCells)
+        public bool[][] ComputeNextState(bool[][] board)
         {
-            _nextStateBuffer.Clear();
-            var neighborCounts = new Dictionary<(int, int), int>();
+            int rows = board.Length;
+            int cols = board[0].Length;
+            bool[][] nextState = new bool[rows][];
 
-            foreach (var (x, y) in aliveCells)
+            for (int i = 0; i < rows; i++)
             {
-                int count = 0;
-                for (int dx = -1; dx <= 1; dx++)
+                nextState[i] = new bool[cols];
+            }
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
                 {
-                    for (int dy = -1; dy <= 1; dy++)
-                    {
-                        if (dx == 0 && dy == 0) continue;
-
-                        var neighbor = (x + dx, y + dy);
-                        if (aliveCells.Contains(neighbor))
-                            count++;
-                        else
-                            neighborCounts[neighbor] = neighborCounts.GetValueOrDefault(neighbor, 0) + 1;
-                    }
+                    int aliveNeighbors = CountAliveNeighbors(board, i, j);
+                    nextState[i][j] = board[i][j] ? (aliveNeighbors == 2 || aliveNeighbors == 3) : (aliveNeighbors == 3);
                 }
-
-                if (count == 2 || count == 3)
-                    _nextStateBuffer.Add((x, y));
             }
 
-            foreach (var (pos, count) in neighborCounts)
-            {
-                if (count == 3)
-                    _nextStateBuffer.Add(pos);
-            }
-
-            return new HashSet<(int, int)>(_nextStateBuffer);
+            return nextState;
         }
 
-        public int GetBoardHash(HashSet<(int, int)> board)
+        private int CountAliveNeighbors(bool[][] board, int x, int y)
+        {
+            int rows = board.Length;
+            int cols = board[0].Length;
+            int count = 0;
+            int[] dx = { -1, -1, -1, 0, 0, 1, 1, 1 };
+            int[] dy = { -1, 0, 1, -1, 1, -1, 0, 1 };
+
+            for (int i = 0; i < 8; i++)
+            {
+                int nx = x + dx[i];
+                int ny = y + dy[i];
+
+                if (nx >= 0 && nx < rows && ny >= 0 && ny < cols && board[nx][ny])
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        public int GetBoardHash(bool[][] board)
         {
             int hash = 17;
-            foreach (var (x, y) in board)
+            foreach (var row in board)
             {
-                hash = hash * 31 + x;
-                hash = hash * 31 + y;
+                foreach (var cell in row)
+                {
+                    hash = hash * 31 + (cell ? 1 : 0);
+                }
             }
             return hash;
         }

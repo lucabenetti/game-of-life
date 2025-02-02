@@ -2,7 +2,7 @@
 {
     public class FinalStateResultDto
     {
-        public HashSet<(int, int)>? Board { get; set; }
+        public bool[][]? Board { get; set; }
         public bool Completed { get; set; }
     }
 }
