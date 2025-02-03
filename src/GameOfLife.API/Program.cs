@@ -1,4 +1,5 @@
 using GameOfLife.API.Extensions;
+using GameOfLife.API.Middlewares;
 
 namespace GameOfLife.API
 {
@@ -24,6 +25,8 @@ namespace GameOfLife.API
             app.UseAuthorization();
 
             app.MapControllers();
+
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.Run();
         }

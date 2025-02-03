@@ -71,5 +71,11 @@ namespace GameOfLife.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("error")]
+        public IActionResult GetError()
+        {
+            throw new Exception("This is a test exception.");
+        }
     }
 }
