@@ -15,7 +15,7 @@ namespace GameOfLife.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.RegisterServices();
+            builder.Services.RegisterServices(builder.Configuration);
 
             var app = builder.Build();
 
@@ -25,6 +25,8 @@ namespace GameOfLife.API
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
+
+            app.MapFallback(() => Results.Redirect("/swagger"));
 
             app.MapControllers();
 

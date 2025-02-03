@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:latest
+    container_name: game-of-life-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    
+  seq:
+    container_name: game-of-life-seq
+    image: datalust/seq:latest
+    hostname: localhost
+    ports: 
+        - 5341:80
+    networks:
+        - game-of-life-net
+    environment:
+        - ACCEPT_EULA=Y
+        
+  api:
+    container_name: game-of-life-api
+    image: game-of-life-api:latest
+    restart: on-failure
+    build:
+      context: ../.
+      dockerfile: ./src/GameOfLife.API/Dockerfile
+    ports:
+        - 5010:80
+    networks:
+        - game-of-life-net
+    environment:
+        - ASPNETCORE_ENVIRONMENT=Local
+    depends_on:
+      - redis
+      - seq
+
+volumes:
+  redis_data:
+
+networks:
+  game-of-life-net:
+    driver: bridge

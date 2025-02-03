@@ -8,16 +8,16 @@ namespace GameOfLife.API.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static void RegisterServices(this IServiceCollection services)
+        public static void RegisterServices(this IServiceCollection services, ConfigurationManager configurationManager)
         {
-            AddDatabases(services);
+            AddDatabases(services, configurationManager);
             AddServices(services);
             AddRepositories(services);
         }
 
-        private static void AddDatabases(IServiceCollection services)
+        private static void AddDatabases(IServiceCollection services, ConfigurationManager configurationManager)
         {
-            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost"));
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(configurationManager["Redis:Host"]!));
         }
 
         private static void AddServices(IServiceCollection services)
