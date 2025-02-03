@@ -4,15 +4,15 @@
 ## Problem Description
 Conway's Game of Life is a zero-player game that follows a set of rules to determine the state of a grid of cells in each generation. The objective of this project is to implement a RESTful API that allows users to:
 
-Upload a board state and receive a unique identifier.
+- Upload a board state and receive a unique identifier.
 
-Retrieve the next state of a given board.
+- Retrieve the next state of a given board.
 
-Compute multiple states ahead for a board.
+- Compute multiple states ahead for a board.
 
-Retrieve the final stable state of a board or return an error if a stable state is not reached within a given number of iterations.
+- Retrieve the final stable state of a board or return an error if a stable state is not reached within a given number of iterations.
 
-Ensure persistence of board states even after server restarts.
+- Ensure persistence of board states even after server restarts.
 
 
 ## How to execute
@@ -56,8 +56,8 @@ The API is designed following the Controller-Service-Repository pattern:
 - **docs**: contains documentation related files, like some sample input jsons
 
 ### Solution project division
-**GameOfLife.API**: web api project
-**GameOfLife.Tests**: contains tests
+- **GameOfLife.API**: web api project
+- **GameOfLife.Tests**: contains tests
 
 ### Dependencies
 - Redis
