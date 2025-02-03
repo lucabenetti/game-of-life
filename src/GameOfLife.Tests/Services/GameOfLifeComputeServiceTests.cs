@@ -1,7 +1,7 @@
 using GameOfLife.API.Services;
 using Xunit;
 
-namespace GameOfLife.Tests
+namespace GameOfLife.Tests.Services
 {
     public class GameOfLifeComputeServiceTests
     {
@@ -96,7 +96,7 @@ namespace GameOfLife.Tests
 
             // Act & Assert
             Assert.Equal(1, _gameOfLifeComputeService.CountAliveNeighbors(board, 0, 0));
-            Assert.Equal(3, _gameOfLifeComputeService.CountAliveNeighbors(board, 1, 2)); 
+            Assert.Equal(3, _gameOfLifeComputeService.CountAliveNeighbors(board, 1, 2));
             Assert.Equal(2, _gameOfLifeComputeService.CountAliveNeighbors(board, 2, 2));
         }
 

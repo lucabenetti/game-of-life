@@ -4,7 +4,7 @@ using GameOfLife.API.Repositories.Interfaces;
 using GameOfLife.API.Services;
 using GameOfLife.API.Services.Interfaces;
 
-namespace GameOfLife.Tests
+namespace GameOfLife.Tests.Services
 {
     public class GameOfLifeServiceTests
     {
