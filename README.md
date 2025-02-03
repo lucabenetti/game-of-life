@@ -77,7 +77,7 @@ The API is designed following the Controller-Service-Repository pattern:
 
 ### Assumptions
 
-- The board is represented as a `boolean[][]`` where true represents a live cell and false represents a dead cell. Using `bool[][]` instead of `int[][]`` in Conway’s Game of Life is a better choice because it is memory-efficient (1 bit vs. 32 bits per cell), faster for boolean operations, and clearer for representing binary states (alive/dead).
+- The board is represented as a `boolean[][]` where true represents a live cell and false represents a dead cell. Using `bool[][]` instead of `int[][]` in Conway’s Game of Life is a better choice because it is memory-efficient (1 bit vs. 32 bits per cell), faster for boolean operations, and clearer for representing binary states (alive/dead).
 
 - The API must ensure state persistence between crashes or restarts.
 
