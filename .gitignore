@@ -7,3 +7,5 @@
 /.vs/ProjectEvaluation
 /src/GameOfLife.API/obj
 /src/GameOfLife.API/bin/Debug/net7.0
+/src/GameOfLife.Tests/bin/Debug/net7.0
+/src/GameOfLife.Tests/obj

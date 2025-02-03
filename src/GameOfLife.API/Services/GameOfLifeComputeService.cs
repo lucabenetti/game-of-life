@@ -27,7 +27,7 @@ namespace GameOfLife.API.Services
             return nextState;
         }
 
-        private int CountAliveNeighbors(bool[][] board, int x, int y)
+        public int CountAliveNeighbors(bool[][] board, int x, int y)
         {
             int rows = board.Length;
             int cols = board[0].Length;
