@@ -1,4 +1,5 @@
 ﻿using GameOfLife.API.DTOs;
+using GameOfLife.API.Middlewares;
 using GameOfLife.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,10 +15,12 @@ namespace GameOfLife.API.Controllers
         private const int MaxBoardHeight = 500;
 
         private readonly IGameOfLifeService _gameOfLifeService;
+        private readonly ILogger<GameOfLifeController> _logger;
 
-        public GameOfLifeController(IGameOfLifeService service)
+        public GameOfLifeController(IGameOfLifeService service, ILogger<GameOfLifeController> logger)
         {
             _gameOfLifeService = service;
+            _logger = logger;
         }
 
         [HttpPost("upload")]
@@ -25,6 +28,7 @@ namespace GameOfLife.API.Controllers
         {
             if (board == null || board.Length == 0)
             {
+                _logger.LogInformation("Request received to upload null board");
                 return BadRequest("The board cannot be null or empty.");
             }
 
@@ -33,6 +37,7 @@ namespace GameOfLife.API.Controllers
 
             if (rows > MaxBoardHeight || cols > MaxBoardWidth)
             {
+                _logger.LogInformation("Request received with height: {@rows}, width: {@cols}", rows, cols);
                 return BadRequest($"Board size exceeds limit. Max allowed size is {MaxBoardHeight} x {MaxBoardWidth}.");
             }
 
@@ -40,11 +45,15 @@ namespace GameOfLife.API.Controllers
             {
                 if (board[i] == null || board[i].Length != cols)
                 {
+                    _logger.LogInformation("Request received with inconsistent size, height: {@rows}, width: {@cols}, row: {@row}", rows, cols, i);
                     return BadRequest($"Row {i} is null or inconsistent in size.");
                 }
             }
 
             var id = await _gameOfLifeService.UploadBoard(board);
+
+            _logger.LogInformation("Game stored with id: {@id}", id);
+
             return Ok(id);
         }
 
@@ -52,6 +61,9 @@ namespace GameOfLife.API.Controllers
         public async Task<ActionResult<bool[][]>> GetNextState(Guid id)
         {
             var nextState = await _gameOfLifeService.GetNextState(id);
+
+            _logger.LogInformation("Game updated to next state id: {@id}", id);
+
             return nextState != null ? Ok(nextState) : NotFound();
         }
 
@@ -60,14 +72,18 @@ namespace GameOfLife.API.Controllers
         {
             if (maxAttempts <= 0 || maxAttempts > MaxAllowedAttempts)
             {
+                _logger.LogInformation("Max attempts surpasses allowed: {@id}, attemps: {@attempts}", id, maxAttempts);
                 return BadRequest($"maxAttempts must be between 1 and {MaxAllowedAttempts}.");
             }
 
             var result = await _gameOfLifeService.GetFinalState(id, maxAttempts);
             if (result.Board == null)
             {
+                _logger.LogInformation("No final state reached within the given attempts: {@id}, attemps: {@attempts}", id, maxAttempts);
                 return BadRequest("No final state reached within the given attempts.");
             }
+
+            _logger.LogInformation("Game updated to final state id: {@id}", id);
 
             return Ok(result);
         }

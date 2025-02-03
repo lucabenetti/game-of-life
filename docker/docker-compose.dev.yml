@@ -10,6 +10,17 @@ services:
     volumes:
       - redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
+    
+  seq:
+    container_name: game-of-life-seq
+    image: datalust/seq:latest
+    hostname: localhost
+    ports: 
+        - 5341:80
+    networks:
+        - game-of-life-net
+    environment:
+        - ACCEPT_EULA=Y
 
 volumes:
   redis_data:

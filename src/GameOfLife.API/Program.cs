@@ -9,6 +9,8 @@ namespace GameOfLife.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.AddSerilog();
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
