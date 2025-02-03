@@ -11,8 +11,23 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F793DE6D-489E-4586-89A8-15438C0AFC4F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{27648360-8EAC-4A61-B53C-6D06E8CFDD61}"
+	ProjectSection(SolutionItems) = preProject
+		docs\sample_payloads\blinker.json = docs\sample_payloads\blinker.json
+		docs\sample_payloads\empty_board.json = docs\sample_payloads\empty_board.json
+		docs\sample_payloads\game_of_life_500x500.json = docs\sample_payloads\game_of_life_500x500.json
+		docs\sample_payloads\game_of_life_50x50.json = docs\sample_payloads\game_of_life_50x50.json
+		docs\sample_payloads\lwss.json = docs\sample_payloads\lwss.json
+		docs\sample_payloads\single_cell.json = docs\sample_payloads\single_cell.json
+		docs\sample_payloads\small_glider.json = docs\sample_payloads\small_glider.json
+		docs\sample_payloads\still_life.json = docs\sample_payloads\still_life.json
+		docs\sample_payloads\toad.json = docs\sample_payloads\toad.json
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{02452507-F6A7-44BB-886C-E0FC019A95F8}"
+	ProjectSection(SolutionItems) = preProject
+		docker\docker-compose.dev.yml = docker\docker-compose.dev.yml
+		docker\docker-compose.yml = docker\docker-compose.yml
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{AF6C0426-7167-41B5-8CEC-0AC1C0EB512A}"
 EndProject
