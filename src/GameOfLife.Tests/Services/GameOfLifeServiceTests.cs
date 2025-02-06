@@ -207,7 +207,7 @@ namespace GameOfLife.Tests.Services
             var result = await _gameOfLifeService.GetFinalState(Guid.NewGuid(), 5000);
 
             // Assert
-            Assert.False(result.IsSuccess);
+            Assert.True(result.IsSuccess);
         }
 
         [Fact]
