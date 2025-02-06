@@ -29,7 +29,7 @@ public class GameOfLifeIntegrationTests : IAsyncLifetime
         _redisContainer = new RedisBuilder()
             .WithImage("redis:7")
             .WithCleanUp(true)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(6379)) // Ensure Redis is ready
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(6379)) // Ensure Redis is ready for GitHub Actions
             .Build();
     }
 
