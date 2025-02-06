@@ -1,4 +1,4 @@
-name: Tests
+name: Integration Tests
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
       - develop
 
 jobs:
-  test:
+  integration-test:
     runs-on: ubuntu-latest
     services:
       redis:
@@ -47,8 +47,8 @@ jobs:
     - name: Build Solution
       run: dotnet build --configuration Release --no-restore
 
-    - name: Run Tests
+    - name: Run Integration Tests
       env:
         DOTNET_EnablePreviewFeatures: "true"
         Testcontainers_DisableChecks: "true"
-      run: dotnet test --configuration Release --no-restore --verbosity normal
+      run: dotnet test --configuration Release --no-restore --verbosity normal --filter "Category=Integration"
