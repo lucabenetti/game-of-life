@@ -1,47 +1,67 @@
-version: '3.8'
+name: Performance Tests
 
-services:
-  redis:
-    image: redis:latest
-    container_name: game-of-life-redis
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: ["redis-server", "--appendonly", "yes"]
-    
-  seq:
-    container_name: game-of-life-seq
-    image: datalust/seq:latest
-    hostname: localhost
-    ports: 
-        - 5341:80
-    networks:
-        - game-of-life-net
-    environment:
-        - ACCEPT_EULA=Y
-        
-  api:
-    container_name: game-of-life-api
-    image: game-of-life-api:latest
-    restart: on-failure
-    build:
-      context: ../.
-      dockerfile: ./src/GameOfLife.API/Dockerfile
-    ports:
-        - 5010:80
-    networks:
-        - game-of-life-net
-    environment:
-        - ASPNETCORE_ENVIRONMENT=Local
-    depends_on:
-      - redis
-      - seq
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
 
-volumes:
-  redis_data:
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 5
 
-networks:
-  game-of-life-net:
-    driver: bridge
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup Docker BuildKit
+      run: echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
+
+    - name: Build API Docker Image
+      run: |
+        docker build -t gameoflife-api:latest -f ./src/GameOfLife.API/Dockerfile ../.
+
+    - name: Start API Container
+      run: |
+        docker run -d --name gameoflife-api -p 5000:5000 --env Redis__Host=redis gameoflife-api:latest
+        sleep 10  # Wait for API to fully start
+
+    - name: Verify API is Running
+      run: |
+        for i in {1..10}; do
+          if curl --silent --fail http://localhost:5000/swagger; then
+            echo "API is running on http://localhost:5000"
+            exit 0
+          fi
+          echo "Waiting for API to be ready..."
+          sleep 2
+        done
+        echo "API failed to start"
+        exit 1
+
+    - name: Install K6
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gnupg software-properties-common
+        curl -fsSL https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/k6-archive-keyring.gpg
+        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install -y k6
+
+    - name: Run Performance Test
+      run: k6 run ./src/GameOfLife.Tests/Performance/performance-test.js
+      env:
+        API_URL: http://localhost:5000
+
+    - name: Cleanup Containers
+      run: docker stop gameoflife-api && docker rm gameoflife-api
