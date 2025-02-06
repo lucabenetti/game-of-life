@@ -1,57 +1,35 @@
-name: Performance Tests
+import http from 'k6/http';
+import { check, sleep } from 'k6';
 
-on:
-  push:
-    branches:
-      - main
-      - develop
-  pull_request:
-    branches:
-      - main
-      - develop
+export let options = {
+    stages: [
+        { duration: '10s', target: 10 },  // Ramp-up to 10 users
+        { duration: '30s', target: 50 },  // Hold at 50 users
+        { duration: '10s', target: 0 }    // Ramp-down
+    ],
+    thresholds: {
+        'http_req_duration{status:200}': ['p(95)<100'],  // 95% of requests must be < 100ms
+        'http_req_failed': ['rate<0.01'],  // Less than 1% failure rate
+        'http_reqs': ['count>1000'],  // Ensure at least 100 requests are processed
+    }
+};
 
-jobs:
-  stress-test:
-    runs-on: ubuntu-latest
-    services:
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
+export default function () {
+    let board =
+        [
+            [0, 1, 0],
+            [1, 0, 1],
+            [0, 1, 0]
+        ];
 
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+    let res = http.post('https://localhost:7121/api/gameoflife/upload', JSON.stringify(board), {
+        headers: { 'Content-Type': 'application/json' }
+    });
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 7.0.x
+    check(res, {
+        'Status is 201': (r) => r.status === 201,
+        'Response time is acceptable': (r) => r.timings.duration < 100
+    });
 
-    - name: Wait for Redis to be Ready
-      run: |
-        for i in {1..10}; do
-          if nc -z localhost 6379; then
-            echo "Redis is ready!"
-            exit 0
-          fi
-          echo "Waiting for Redis..."
-          sleep 2
-        done
-        echo "Redis failed to start"
-        exit 1
-
-    - name: Build and Start API
-      run: |
-        dotnet build --configuration Release
-        dotnet run --configuration Release --no-launch-profile &  # Start API in background
-        sleep 5  # Wait for API to start
-
-    - name: Install K6
-      run: sudo apt-get install -y k6
-
-    - name: Run Stress Test
-      run: k6 run tests/performance/stress-test.js
-      env:
-        API_URL: http://localhost:5000
-
+    sleep(1);  // Simulate real-world user wait time
+}
