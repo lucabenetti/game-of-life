@@ -34,14 +34,14 @@ jobs:
 
     - name: Start API Container
       run: |
-        docker run -d --name gameoflife-api -p 5000:80 --env Redis__Host=redis gameoflife-api:latest
+        docker run -d --name gameoflife-api -p 80:80 -p 443:443 --env Redis__Host=redis gameoflife-api:latest
         sleep 10
 
     - name: Verify API is Running
       run: |
         for i in {1..10}; do
-          if curl --silent --fail http://localhost:5000/health; then
-            echo "API is running on http://localhost:5000"
+          if curl --silent --fail http://localhost:443/health; then
+            echo "API is running on http://localhost:443"
             exit 0
           fi
           echo "Waiting for API to be ready..."
@@ -62,7 +62,7 @@ jobs:
     - name: Run Performance Test
       run: k6 run ./src/GameOfLife.Tests/Performance/performance-test.js
       env:
-        API_URL: http://localhost:5000
+        API_URL: http://localhost:443
 
     - name: Cleanup Containers
       run: docker stop gameoflife-api && docker rm gameoflife-api
