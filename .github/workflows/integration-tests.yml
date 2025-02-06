@@ -1,4 +1,4 @@
-name: Tests
+name: Integration Tests
 
 on:
   push:
@@ -11,8 +11,13 @@ on:
       - develop
 
 jobs:
-  test:
+  integration-test:
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
 
     steps:
     - name: Checkout Code
@@ -29,5 +34,8 @@ jobs:
     - name: Build Solution
       run: dotnet build --configuration Release --no-restore
 
-    - name: Run Tests
-      run: dotnet test --configuration Release --no-restore --verbosity normal
+    - name: Run Integration Tests
+      env:
+        DOTNET_EnablePreviewFeatures: "true"
+        Testcontainers_DisableChecks: "true"
+      run: dotnet test --configuration Release --no-restore --verbosity normal --filter "Category=Integration"

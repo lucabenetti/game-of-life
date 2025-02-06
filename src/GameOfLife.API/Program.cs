@@ -26,8 +26,6 @@ namespace GameOfLife.API
 
             app.UseAuthorization();
 
-            app.MapFallback(() => Results.Redirect("/swagger"));
-
             app.MapControllers();
 
             app.UseMiddleware<ExceptionMiddleware>();

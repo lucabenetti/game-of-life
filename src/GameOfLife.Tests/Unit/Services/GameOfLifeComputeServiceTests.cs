@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace GameOfLife.Tests.Services
+namespace GameOfLife.Tests.Unit.Services
 {
     public class GameOfLifeComputeServiceTests
     {
