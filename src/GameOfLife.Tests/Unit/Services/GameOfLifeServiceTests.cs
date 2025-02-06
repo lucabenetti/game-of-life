@@ -8,7 +8,7 @@ using GameOfLife.API.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace GameOfLife.Tests.Services
+namespace GameOfLife.Tests.Unit.Services
 {
     public class GameOfLifeServiceTests
     {

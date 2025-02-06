@@ -4,7 +4,7 @@ using StackExchange.Redis;
 using GameOfLife.API.Models;
 using GameOfLife.API.Repositories;
 
-namespace GameOfLife.Tests.Repositories
+namespace GameOfLife.Tests.Unit.Repositories
 {
     public class GameOfLifeRepositoryTests
     {
