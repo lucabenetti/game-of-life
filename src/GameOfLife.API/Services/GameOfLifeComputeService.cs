@@ -66,7 +66,7 @@ namespace GameOfLife.API.Services
         /// <param name="x">Row index of the cell.</param>
         /// <param name="y">Column index of the cell.</param>
         /// <returns>Number of live neighbors around the specified cell.</returns>
-        private int CountAliveNeighbors(bool[][] board, int x, int y)
+        public int CountAliveNeighbors(bool[][] board, int x, int y)
         {
             int rows = board.Length;
             int cols = board[0].Length;
