@@ -1,6 +1,6 @@
 ﻿namespace GameOfLife.API.Constants
 {
-    public static class ValidationMessage
+    public static class ValidationMessages
     {
         public const string BoardNotFound = "Board not found.";
         public const string BoardSizeExceeded = "Board size exceeds limit.";

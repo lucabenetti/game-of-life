@@ -5,6 +5,10 @@ using GameOfLife.API.Models;
 using GameOfLife.API.Repositories.Interfaces;
 using GameOfLife.API.Services.Interfaces;
 using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace GameOfLife.API.Services
 {
@@ -31,88 +35,114 @@ namespace GameOfLife.API.Services
 
         public async Task<Result<Guid>> UploadBoard(bool[][] board)
         {
-            if (board == null || board.Length == 0)
+            try
             {
-                _logger.LogInformation("Request received to upload a null or empty board.");
-                return Result<Guid>.Failure(ValidationMessage.EmptyBoard);
-            }
-
-            int rows = board.Length;
-            int cols = board[0].Length;
-
-            if (rows > _settings.MaxBoardHeight || cols > _settings.MaxBoardWidth)
-            {
-                _logger.LogInformation("Request received with invalid size: height={@rows}, width={@cols}", rows, cols);
-                return Result<Guid>.Failure($"{ValidationMessage.BoardSizeExceeded} Max allowed size is {_settings.MaxBoardHeight} x {_settings.MaxBoardWidth}.");
-            }
-
-            for (int i = 0; i < rows; i++)
-            {
-                if (board[i] == null || board[i].Length != cols)
+                if (board == null || board.Length == 0)
                 {
-                    _logger.LogInformation("Request received with inconsistent row sizes: row={@row}", i);
-                    return Result<Guid>.Failure(string.Format(ValidationMessage.InvalidBoardStructure, i));
+                    _logger.LogWarning("Upload failed: Board is null or empty.");
+                    return Result<Guid>.Failure(ValidationMessages.EmptyBoard);
                 }
+
+                int rows = board.Length;
+                int cols = board[0].Length;
+
+                if (rows > _settings.MaxBoardHeight || cols > _settings.MaxBoardWidth)
+                {
+                    _logger.LogWarning("Upload failed: Board size exceeds limit. Height: {rows}, Width: {cols}", rows, cols);
+                    return Result<Guid>.Failure($"{ValidationMessages.BoardSizeExceeded} Max allowed size is {_settings.MaxBoardHeight} x {_settings.MaxBoardWidth}.");
+                }
+
+                for (int i = 0; i < rows; i++)
+                {
+                    if (board[i] == null || board[i].Length != cols)
+                    {
+                        _logger.LogWarning("Upload failed: Row {row} is inconsistent in size.", i);
+                        return Result<Guid>.Failure(string.Format(ValidationMessages.InvalidBoardStructure, i));
+                    }
+                }
+
+                var gameBoard = new GameOfLifeBoard(board);
+                await _repository.SaveBoard(gameBoard);
+
+                _logger.LogInformation("Board uploaded successfully. ID: {id}", gameBoard.Id);
+                return Result<Guid>.Success(gameBoard.Id);
             }
-
-            var gameBoard = new GameOfLifeBoard(board);
-            await _repository.SaveBoard(gameBoard);
-
-            _logger.LogInformation("Game stored with id: {@id}", gameBoard.Id);
-            return Result<Guid>.Success(gameBoard.Id);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while uploading the board.");
+                return Result<Guid>.Failure("An unexpected error occurred. Please try again later.");
+            }
         }
 
         public async Task<Result<bool[][]>> GetNextState(Guid id)
         {
-            var gameBoard = await _repository.GetBoard(id);
-            if (gameBoard == null)
+            try
             {
-                _logger.LogInformation("Board not found for id: {@id}", id);
-                return Result<bool[][]>.Failure(ValidationMessage.BoardNotFound);
-            }
+                var gameBoard = await _repository.GetBoard(id);
+                if (gameBoard == null)
+                {
+                    _logger.LogWarning("Next state request failed: Board not found. ID: {id}", id);
+                    return Result<bool[][]>.Failure(ValidationMessages.BoardNotFound);
+                }
 
-            if (IsBoardEmpty(gameBoard.Board))
+                if (IsBoardEmpty(gameBoard.Board))
+                {
+                    return Result<bool[][]>.Success(gameBoard.Board);
+                }
+
+                var nextState = _computeService.ComputeNextState(gameBoard.Board);
+                gameBoard.Board = nextState;
+                await _repository.SaveBoard(gameBoard);
+
+                _logger.LogInformation("Next state computed successfully for ID: {id}", id);
+                return Result<bool[][]>.Success(nextState);
+            }
+            catch (Exception ex)
             {
-                return Result<bool[][]>.Success(gameBoard.Board);
+                _logger.LogError(ex, "An error occurred while computing the next state for ID: {id}", id);
+                return Result<bool[][]>.Failure("An unexpected error occurred. Please try again later.");
             }
-
-            var nextState = _computeService.ComputeNextState(gameBoard.Board);
-            gameBoard.Board = nextState;
-            await _repository.SaveBoard(gameBoard);
-
-            _logger.LogInformation("Game updated to next state for id: {@id}", id);
-            return Result<bool[][]>.Success(nextState);
         }
 
         public async Task<Result<FinalStateResultDto>> GetFinalState(Guid id, int maxAttempts)
         {
-            if (maxAttempts < MinAllowedAttempts || maxAttempts > _settings.MaxAllowedAttempts)
+            try
             {
-                _logger.LogInformation("Invalid maxAttempts: id={@id}, attempts={@attempts}", id, maxAttempts);
-                return Result<FinalStateResultDto>.Failure(string.Format(ValidationMessage.InvalidMaxAttempts, MinAllowedAttempts, _settings.MaxAllowedAttempts));
-            }
-
-            var gameBoard = await _repository.GetBoard(id);
-            if (gameBoard == null)
-            {
-                _logger.LogInformation("Board not found for final state: {@id}", id);
-                return Result<FinalStateResultDto>.Failure(ValidationMessage.BoardNotFound);
-            }
-
-            var seenStates = new HashSet<int>();
-            for (int i = 0; i < maxAttempts; i++)
-            {
-                int hash = _computeService.GetBoardHash(gameBoard.Board);
-                if (seenStates.Contains(hash))
+                if (maxAttempts < MinAllowedAttempts || maxAttempts > _settings.MaxAllowedAttempts)
                 {
-                    return Result<FinalStateResultDto>.Success(new FinalStateResultDto { Board = gameBoard.Board, Completed = true });
+                    _logger.LogWarning("Final state request failed: Invalid maxAttempts for ID: {id}. Attempts: {attempts}", id, maxAttempts);
+                    return Result<FinalStateResultDto>.Failure(string.Format(ValidationMessages.InvalidMaxAttempts, MinAllowedAttempts, _settings.MaxAllowedAttempts));
                 }
 
-                seenStates.Add(hash);
-                gameBoard.Board = _computeService.ComputeNextState(gameBoard.Board);
-            }
+                var gameBoard = await _repository.GetBoard(id);
+                if (gameBoard == null)
+                {
+                    _logger.LogWarning("Final state request failed: Board not found. ID: {id}", id);
+                    return Result<FinalStateResultDto>.Failure(ValidationMessages.BoardNotFound);
+                }
 
-            return Result<FinalStateResultDto>.Failure(ValidationMessage.NoFinalStateReached);
+                var seenStates = new HashSet<int>();
+                for (int i = 0; i < maxAttempts; i++)
+                {
+                    int hash = _computeService.GetBoardHash(gameBoard.Board);
+                    if (seenStates.Contains(hash))
+                    {
+                        _logger.LogInformation("Final state reached for ID: {id} in {attempts} attempts.", id, i);
+                        return Result<FinalStateResultDto>.Success(new FinalStateResultDto { Board = gameBoard.Board, Completed = true });
+                    }
+
+                    seenStates.Add(hash);
+                    gameBoard.Board = _computeService.ComputeNextState(gameBoard.Board);
+                }
+
+                _logger.LogWarning("Final state request failed: No stable state found within {maxAttempts} attempts for ID: {id}.", maxAttempts, id);
+                return Result<FinalStateResultDto>.Failure(ValidationMessages.NoFinalStateReached);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while computing the final state for ID: {id}", id);
+                return Result<FinalStateResultDto>.Failure("An unexpected error occurred. Please try again later.");
+            }
         }
 
         private bool IsBoardEmpty(bool[][] board)
