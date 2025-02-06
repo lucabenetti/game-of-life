@@ -2,10 +2,19 @@
 
 namespace GameOfLife.API.Services
 {
+    /// <summary>
+    /// Service responsible for computing the next state of the Game of Life grid.
+    /// Implements memoization to cache previously computed states.
+    /// </summary>
     public class GameOfLifeComputeService : IGameOfLifeComputeService
     {
-        private readonly Dictionary<int, bool[][]> _stateCache = new(); // Cache for memoization
+        /// <summary>
+        /// Cache for memoization to store previously computed board states.
+        /// This helps in avoiding redundant computations for the same state.
+        /// </summary>
+        private readonly Dictionary<int, bool[][]> _stateCache = new();
 
+        /// <inheritdoc />
         public bool[][] ComputeNextState(bool[][] board)
         {
             int boardHash = GetBoardHash(board);
@@ -35,7 +44,29 @@ namespace GameOfLife.API.Services
             return nextState;
         }
 
-        public int CountAliveNeighbors(bool[][] board, int x, int y)
+        /// <inheritdoc />
+        public int GetBoardHash(bool[][] board)
+        {
+            int hash = 17;
+            foreach (var row in board)
+            {
+                foreach (var cell in row)
+                {
+                    hash = hash * 31 + (cell ? 1 : 0); // Generate a unique hash for the board state
+                }
+            }
+            return hash;
+        }
+
+        /// <summary>
+        /// Counts the number of live neighbors for a given cell in the board.
+        /// A neighbor is considered "alive" if its value is true.
+        /// </summary>
+        /// <param name="board">Current state of the board as a 2D boolean array.</param>
+        /// <param name="x">Row index of the cell.</param>
+        /// <param name="y">Column index of the cell.</param>
+        /// <returns>Number of live neighbors around the specified cell.</returns>
+        private int CountAliveNeighbors(bool[][] board, int x, int y)
         {
             int rows = board.Length;
             int cols = board[0].Length;
@@ -53,19 +84,6 @@ namespace GameOfLife.API.Services
                 }
             }
             return count;
-        }
-
-        public int GetBoardHash(bool[][] board)
-        {
-            int hash = 17;
-            foreach (var row in board)
-            {
-                foreach (var cell in row)
-                {
-                    hash = hash * 31 + (cell ? 1 : 0); // Generate a unique hash for the board state
-                }
-            }
-            return hash;
         }
     }
 }
