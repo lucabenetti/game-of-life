@@ -57,6 +57,6 @@ jobs:
         sudo apt-get install -y k6
 
     - name: Run Performance Test  # ✅ Updated step name
-      run: k6 run tests/performance/performance-test.js
+      run: k6 run ./src/GameOfLife.Tests/Performance/performance-test.js
       env:
         API_URL: http://localhost:5000
