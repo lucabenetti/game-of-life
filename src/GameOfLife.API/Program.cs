@@ -14,6 +14,7 @@ namespace GameOfLife.API
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddHealthChecks();
 
             builder.Services.RegisterServices(builder.Configuration);
 
