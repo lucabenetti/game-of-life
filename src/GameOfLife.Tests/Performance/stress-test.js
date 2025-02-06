@@ -54,3 +54,4 @@ jobs:
       run: k6 run tests/performance/stress-test.js
       env:
         API_URL: http://localhost:5000
+
