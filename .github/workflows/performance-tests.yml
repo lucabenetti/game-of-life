@@ -20,18 +20,6 @@ jobs:
           - 6379:6379
         options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 5
 
-      api:
-        image: gameoflife-api:latest
-        ports:
-          - 5000:5000
-        options: >-
-          --health-cmd "curl --silent --fail http://localhost:5000/health || exit 1"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-        env:
-          Redis__Host: redis
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
@@ -41,6 +29,11 @@ jobs:
 
     - name: Build API Docker Image
       run: docker build -t gameoflife-api:latest ./src/GameOfLife.API
+
+    - name: Start API Container
+      run: |
+        docker run -d --name gameoflife-api -p 5000:5000 --env Redis__Host=redis gameoflife-api:latest
+        sleep 10  # Wait for API to fully start
 
     - name: Verify API is Running
       run: |
@@ -68,3 +61,6 @@ jobs:
       run: k6 run ./src/GameOfLife.Tests/Performance/performance-test.js
       env:
         API_URL: http://localhost:5000
+
+    - name: Cleanup Containers
+      run: docker stop gameoflife-api && docker rm gameoflife-api
