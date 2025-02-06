@@ -26,6 +26,8 @@ namespace GameOfLife.API
 
             app.UseAuthorization();
 
+            app.MapHealthChecks("/health");
+
             app.MapControllers();
 
             app.UseMiddleware<ExceptionMiddleware>();
