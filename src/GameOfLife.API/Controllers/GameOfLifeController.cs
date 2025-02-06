@@ -1,6 +1,9 @@
 ﻿using GameOfLife.API.DTOs;
+using GameOfLife.API.Models;
 using GameOfLife.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace GameOfLife.API.Controllers
 {
@@ -19,21 +22,36 @@ namespace GameOfLife.API.Controllers
         public async Task<IActionResult> Upload([FromBody] bool[][] board)
         {
             var result = await _gameOfLifeService.UploadBoard(board);
-            return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(new ApiResponse<Guid>(default, result.ErrorMessage, false));
+            }
+
+            return CreatedAtAction(nameof(GetNextState), new { id = result.Value }, new ApiResponse<Guid>(result.Value, "Board uploaded successfully."));
         }
 
         [HttpGet("{id}/next")]
         public async Task<IActionResult> GetNextState(Guid id)
         {
             var result = await _gameOfLifeService.GetNextState(id);
-            return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+            if (!result.IsSuccess)
+            {
+                return NotFound(new ApiResponse<bool[][]>(null, result.ErrorMessage, false));
+            }
+
+            return Ok(new ApiResponse<bool[][]>(result.Value, "Next state computed successfully."));
         }
 
         [HttpGet("{id}/final/{maxAttempts}")]
         public async Task<IActionResult> GetFinalState(Guid id, int maxAttempts)
         {
             var result = await _gameOfLifeService.GetFinalState(id, maxAttempts);
-            return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(new ApiResponse<FinalStateResultDto>(null, result.ErrorMessage, false));
+            }
+
+            return Ok(new ApiResponse<FinalStateResultDto>(result.Value, "Final state computation completed."));
         }
     }
 }

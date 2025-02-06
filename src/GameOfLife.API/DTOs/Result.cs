@@ -4,16 +4,16 @@
     {
         public bool IsSuccess { get; }
         public T? Value { get; }
-        public string? Error { get; }
+        public string? ErrorMessage { get; }
 
-        private Result(T? value, bool isSuccess, string? error)
+        private Result(T? value, bool isSuccess, string? errorMessage)
         {
             Value = value;
             IsSuccess = isSuccess;
-            Error = error;
+            ErrorMessage = errorMessage;
         }
 
-        public static Result<T> Success(T value) => new Result<T>(value, true, null);
-        public static Result<T> Failure(string error) => new Result<T>(default, false, error);
+        public static Result<T> Success(T value) => new(value, true, null);
+        public static Result<T> Failure(string errorMessage) => new(default, false, errorMessage);
     }
 }

@@ -5,10 +5,6 @@ using GameOfLife.API.Models;
 using GameOfLife.API.Repositories.Interfaces;
 using GameOfLife.API.Services.Interfaces;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace GameOfLife.API.Services
 {
@@ -111,7 +107,9 @@ namespace GameOfLife.API.Services
                 if (maxAttempts < MinAllowedAttempts || maxAttempts > _settings.MaxAllowedAttempts)
                 {
                     _logger.LogWarning("Final state request failed: Invalid maxAttempts for ID: {id}. Attempts: {attempts}", id, maxAttempts);
-                    return Result<FinalStateResultDto>.Failure(string.Format(ValidationMessages.InvalidMaxAttempts, MinAllowedAttempts, _settings.MaxAllowedAttempts));
+                    return Result<FinalStateResultDto>.Failure(
+                        string.Format(ValidationMessages.InvalidMaxAttempts, MinAllowedAttempts, _settings.MaxAllowedAttempts)
+                    );
                 }
 
                 var gameBoard = await _repository.GetBoard(id);
