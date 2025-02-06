@@ -43,12 +43,13 @@ namespace GameOfLife.Tests.Services
         public async Task UploadBoard_ShouldSaveBoardAndReturnId()
         {
             // Arrange
-            var board = new bool[][]
+            var board = new int[][]
             {
-                new bool[] { false, true, false },
-                new bool[] { false, false, true },
-                new bool[] { true, true, true }
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 0, 1 },
+                new int[] { 1, 1, 1 }
             };
+
 
             // Act
             var result = await _gameOfLifeService.UploadBoard(board);
@@ -73,7 +74,7 @@ namespace GameOfLife.Tests.Services
         public async Task UploadBoard_ShouldFail_WhenBoardIsEmpty()
         {
             // Arrange
-            bool[][] board = new bool[][] { };
+            int[][] board = new int[][] { };
 
             // Act
             var result = await _gameOfLifeService.UploadBoard(board);
@@ -87,11 +88,12 @@ namespace GameOfLife.Tests.Services
         public async Task UploadBoard_ShouldFail_WhenBoardHasInconsistentRowSizes()
         {
             // Arrange
-            bool[][] board = new bool[][]
+            int[][] board = new int[][]
             {
-                new bool[] { false, true },
-                new bool[] { false, true, false }
+                new int[] { 0, 1 },
+                new int[] { 0, 1, 0 }
             };
+
 
             // Act
             var result = await _gameOfLifeService.UploadBoard(board);
@@ -105,11 +107,12 @@ namespace GameOfLife.Tests.Services
         public async Task UploadBoard_ShouldFail_WhenBoardHasNoLiveCells()
         {
             // Arrange
-            bool[][] board = new bool[][]
+            int[][] board = new int[][]
             {
-                new bool[] { false, false },
-                new bool[] { false, false }
+                new int[] { 0, 0 },
+                new int[] { 0, 0 }
             };
+
 
             // Act
             var result = await _gameOfLifeService.UploadBoard(board);
@@ -123,18 +126,18 @@ namespace GameOfLife.Tests.Services
         public async Task GetNextState_ShouldReturnNextState_WhenBoardExists()
         {
             // Arrange
-            var initialState = new bool[][]
+            var initialState = new int[][]
             {
-                new bool[] { false, true, false },
-                new bool[] { false, false, true },
-                new bool[] { true, true, true }
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 0, 1 },
+                new int[] { 1, 1, 1 }
             };
 
-            var nextState = new bool[][]
+            var nextState = new int[][]
             {
-                new bool[] { false, false, true },
-                new bool[] { true, false, true },
-                new bool[] { false, true, true }
+                new int[] { 0, 0, 1 },
+                new int[] { 1, 0, 1 },
+                new int[] { 0, 1, 1 }
             };
 
             var gameBoard = new GameOfLifeBoard(initialState);
@@ -179,11 +182,11 @@ namespace GameOfLife.Tests.Services
         public async Task GetFinalState_ShouldReturnCompleted_WhenLoopDetected()
         {
             // Arrange
-            var initialState = new bool[][]
+            var initialState = new int[][]
             {
-                new bool[] { false, true, false },
-                new bool[] { false, false, true },
-                new bool[] { true, true, true }
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 0, 1 },
+                new int[] { 1, 1, 1 }
             };
 
             var gameBoard = new GameOfLifeBoard(initialState);

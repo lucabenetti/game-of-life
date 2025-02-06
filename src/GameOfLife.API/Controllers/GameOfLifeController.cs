@@ -19,7 +19,7 @@ namespace GameOfLife.API.Controllers
         }
 
         [HttpPost("upload")]
-        public async Task<IActionResult> Upload([FromBody] bool[][] board)
+        public async Task<IActionResult> Upload([FromBody] int[][] board)
         {
             var result = await _gameOfLifeService.UploadBoard(board);
             if (!result.IsSuccess)
@@ -36,10 +36,10 @@ namespace GameOfLife.API.Controllers
             var result = await _gameOfLifeService.GetNextState(id);
             if (!result.IsSuccess)
             {
-                return NotFound(new ApiResponse<bool[][]>(null, result.ErrorMessage, false));
+                return NotFound(new ApiResponse<int[][]>(null, result.ErrorMessage, false));
             }
 
-            return Ok(new ApiResponse<bool[][]>(result.Value, "Next state computed successfully."));
+            return Ok(new ApiResponse<int[][]>(result.Value, "Next state computed successfully."));
         }
 
         [HttpGet("{id}/final/{maxAttempts}")]

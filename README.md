@@ -77,7 +77,7 @@ The API is designed following the Controller-Service-Repository pattern:
 
 ### Assumptions
 
-- The board is represented as a `boolean[][]` where true represents a live cell and false represents a dead cell. Using `bool[][]` instead of `int[][]` in Conway’s Game of Life is a better choice because it is memory-efficient (1 bit vs. 32 bits per cell), faster for boolean operations, and clearer for representing binary states (alive/dead).
+- The board is represented as a `int[][]` where 1 represents a live cell and 0 represents a dead cell.
 
 - The API must ensure state persistence between crashes or restarts.
 
@@ -108,7 +108,6 @@ The API is designed following the Controller-Service-Repository pattern:
     Alternative: Full board comparison (slower but more accurate in rare hash collisions).
     
 ### Possible optimizations
-- **Bitwise Encoding:** Instead of storing the board as a bool[][], it can be stored as a compressed bit array to reduce storage size in Redis.
 - **Sparse Representation:** only active (alive) cells can be stored, instead of the entire board to save space
 - **Parallel Processing:** Use multi-threading or parallel execution to compute the next state faster for large boards.
 - **Caching Board States:** caching previously seen board states in Redis.

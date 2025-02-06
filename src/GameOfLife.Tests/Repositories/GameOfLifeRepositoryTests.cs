@@ -27,11 +27,11 @@ namespace GameOfLife.Tests.Repositories
         {
             // Arrange
             var boardId = Guid.NewGuid();
-            var board = new GameOfLifeBoard(new bool[][]
+            var board = new GameOfLifeBoard(new int[][]
             {
-                new bool[] { false, true, false },
-                new bool[] { false, false, true },
-                new bool[] { true, true, true }
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 0, 1 },
+                new int[] { 1, 1, 1 }
             })
             {
                 Id = boardId
@@ -60,11 +60,11 @@ namespace GameOfLife.Tests.Repositories
         {
             // Arrange
             var boardId = Guid.NewGuid();
-            var board = new GameOfLifeBoard(new bool[][]
+            var board = new GameOfLifeBoard(new int[][]
             {
-                new bool[] { false, true, false },
-                new bool[] { false, false, true },
-                new bool[] { true, true, true }
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 0, 1 },
+                new int[] { 1, 1, 1 }
             })
             {
                 Id = boardId
