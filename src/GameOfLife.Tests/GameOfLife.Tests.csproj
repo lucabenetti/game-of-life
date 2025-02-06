@@ -30,4 +30,8 @@
     <ProjectReference Include="..\GameOfLife.API\GameOfLife.API.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Performance\" />
+  </ItemGroup>
+
 </Project>
