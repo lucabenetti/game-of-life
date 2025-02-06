@@ -27,14 +27,15 @@ jobs:
     - name: Setup Docker BuildKit
       run: echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
 
-    - name: Build API Docker Image
+    - name: Change to Docker Directory and Build API Image
       run: |
-        docker build -t gameoflife-api:latest -f ./src/GameOfLife.API/Dockerfile ../.
+        cd docker
+        docker build -t gameoflife-api:latest -f ../src/GameOfLife.API/Dockerfile ../
 
     - name: Start API Container
       run: |
         docker run -d --name gameoflife-api -p 5000:5000 --env Redis__Host=redis gameoflife-api:latest
-        sleep 10  # Wait for API to fully start
+        sleep 10
 
     - name: Verify API is Running
       run: |
