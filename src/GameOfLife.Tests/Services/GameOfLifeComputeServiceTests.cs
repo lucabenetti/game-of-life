@@ -1,4 +1,8 @@
+using GameOfLife.API.Constants;
 using GameOfLife.API.Services;
+using GameOfLife.API.Services.Interfaces;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
 namespace GameOfLife.Tests.Services
@@ -6,10 +10,12 @@ namespace GameOfLife.Tests.Services
     public class GameOfLifeComputeServiceTests
     {
         private readonly GameOfLifeComputeService _gameOfLifeComputeService;
+        private readonly Mock<ILogger<GameOfLifeComputeService>> _loggerMock;
 
         public GameOfLifeComputeServiceTests()
         {
-            _gameOfLifeComputeService = new GameOfLifeComputeService();
+            _loggerMock = new Mock<ILogger<GameOfLifeComputeService>>();
+            _gameOfLifeComputeService = new GameOfLifeComputeService(_loggerMock.Object);
         }
 
         [Fact]
@@ -38,7 +44,7 @@ namespace GameOfLife.Tests.Services
         }
 
         [Fact]
-        public void ComputeNextState_ShouldReturnCorrectNextState_ForBlockPattern()
+        public void ComputeNextState_ShouldReturnSameState_ForBlockPattern()
         {
             // Arrange
             bool[][] initialState = new bool[][]
@@ -49,13 +55,11 @@ namespace GameOfLife.Tests.Services
                 new bool[] { false, false, false, false }
             };
 
-            bool[][] expectedNextState = initialState;
-
             // Act
             bool[][] nextState = _gameOfLifeComputeService.ComputeNextState(initialState);
 
             // Assert
-            Assert.Equal(expectedNextState, nextState);
+            Assert.Equal(initialState, nextState);
         }
 
         [Fact]
@@ -84,7 +88,66 @@ namespace GameOfLife.Tests.Services
         }
 
         [Fact]
-        public void CountAliveNeighbors_ShouldReturnCorrectCount_ForGivenCell()
+        public void ComputeNextState_ShouldReturnNull_WhenBoardIsNull()
+        {
+            // Act
+            var result = _gameOfLifeComputeService.ComputeNextState(null);
+
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void ComputeNextState_ShouldReturnNull_WhenBoardIsEmpty()
+        {
+            // Arrange
+            bool[][] emptyBoard = new bool[][] { };
+
+            // Act
+            var result = _gameOfLifeComputeService.ComputeNextState(emptyBoard);
+
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void ComputeNextState_ShouldReturnNull_WhenBoardHasInconsistentRowSizes()
+        {
+            // Arrange
+            bool[][] inconsistentBoard = new bool[][]
+            {
+                new bool[] { true, false },
+                new bool[] { true, false, true }
+            };
+
+            // Act
+            var result = _gameOfLifeComputeService.ComputeNextState(inconsistentBoard);
+
+            // Assert
+            Assert.Null(result);
+        }
+
+        [Fact]
+        public void ComputeNextState_ShouldReturnCachedState_WhenStateAlreadyComputed()
+        {
+            // Arrange
+            bool[][] board = new bool[][]
+            {
+                new bool[] { false, true, false },
+                new bool[] { false, false, true },
+                new bool[] { true, true, true }
+            };
+
+            // Act
+            var firstCall = _gameOfLifeComputeService.ComputeNextState(board);
+            var secondCall = _gameOfLifeComputeService.ComputeNextState(board);
+
+            // Assert
+            Assert.Same(firstCall, secondCall);
+        }
+
+        [Fact]
+        public void CountAliveNeighbors_ShouldReturnCorrectCount()
         {
             // Arrange
             bool[][] board = new bool[][]
@@ -98,6 +161,24 @@ namespace GameOfLife.Tests.Services
             Assert.Equal(1, _gameOfLifeComputeService.CountAliveNeighbors(board, 0, 0));
             Assert.Equal(3, _gameOfLifeComputeService.CountAliveNeighbors(board, 1, 2));
             Assert.Equal(2, _gameOfLifeComputeService.CountAliveNeighbors(board, 2, 2));
+        }
+
+        [Fact]
+        public void CountAliveNeighbors_ShouldReturnZero_WhenCellIsOutOfBounds()
+        {
+            // Arrange
+            bool[][] board = new bool[][]
+            {
+                new bool[] { false, true, false },
+                new bool[] { false, false, true },
+                new bool[] { true, true, true }
+            };
+
+            // Act
+            int neighbors = _gameOfLifeComputeService.CountAliveNeighbors(board, -1, 2); // Out of bounds
+
+            // Assert
+            Assert.Equal(0, neighbors);
         }
 
         [Fact]
