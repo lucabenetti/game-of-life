@@ -4,12 +4,19 @@ namespace GameOfLife.API.Services
 {
     public class GameOfLifeComputeService : IGameOfLifeComputeService
     {
+        private readonly Dictionary<int, bool[][]> _stateCache = new(); // Cache for memoization
+
         public bool[][] ComputeNextState(bool[][] board)
         {
+            int boardHash = GetBoardHash(board);
+            if (_stateCache.TryGetValue(boardHash, out var cachedState))
+            {
+                return cachedState; // Return memoized state if available
+            }
+
             int rows = board.Length;
             int cols = board[0].Length;
             bool[][] nextState = new bool[rows][];
-
             for (int i = 0; i < rows; i++)
             {
                 nextState[i] = new bool[cols];
@@ -24,6 +31,7 @@ namespace GameOfLife.API.Services
                 }
             }
 
+            _stateCache[boardHash] = nextState; // Store computed state in cache
             return nextState;
         }
 
@@ -35,17 +43,15 @@ namespace GameOfLife.API.Services
             int[] dx = { -1, -1, -1, 0, 0, 1, 1, 1 };
             int[] dy = { -1, 0, 1, -1, 1, -1, 0, 1 };
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 8; i++) // Check all 8 neighbors
             {
                 int nx = x + dx[i];
                 int ny = y + dy[i];
-
                 if (nx >= 0 && nx < rows && ny >= 0 && ny < cols && board[nx][ny])
                 {
                     count++;
                 }
             }
-
             return count;
         }
 
@@ -56,7 +62,7 @@ namespace GameOfLife.API.Services
             {
                 foreach (var cell in row)
                 {
-                    hash = hash * 31 + (cell ? 1 : 0);
+                    hash = hash * 31 + (cell ? 1 : 0); // Generate a unique hash for the board state
                 }
             }
             return hash;
