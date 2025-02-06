@@ -18,6 +18,7 @@ jobs:
         image: redis:7
         ports:
           - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 5
 
     steps:
     - name: Checkout Code
@@ -28,26 +29,13 @@ jobs:
       with:
         dotnet-version: 7.0.x
 
-    - name: Wait for Redis to be Ready
-      run: |
-        for i in {1..10}; do
-          if nc -z redis 6379; then
-            echo "Redis is ready!"
-            exit 0
-          fi
-          echo "⏳ Waiting for Redis..."
-          sleep 2
-        done
-        echo "Redis failed to start"
-        exit 1
-
     - name: Build API
       run: dotnet build ./src/GameOfLife.API/GameOfLife.API.csproj --configuration Release
 
     - name: Start API in Background
       run: |
         dotnet run --configuration Release --no-launch-profile --project ./src/GameOfLife.API/GameOfLife.API.csproj --urls "http://localhost:5000" &
-        sleep 10  # Give API time to start
+        sleep 10
       env:
         Redis__Host: redis
 
