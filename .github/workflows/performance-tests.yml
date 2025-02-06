@@ -28,7 +28,8 @@ jobs:
       run: echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
 
     - name: Build API Docker Image
-      run: docker build -t gameoflife-api:latest ./src/GameOfLife.API
+      run: |
+        docker build -t gameoflife-api:latest -f ./src/GameOfLife.API/Dockerfile ../.
 
     - name: Start API Container
       run: |
