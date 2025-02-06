@@ -26,7 +26,9 @@ namespace GameOfLife.API.Extensions
 
         private static void AddDatabases(IServiceCollection services, ConfigurationManager configurationManager)
         {
-            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(configurationManager["Redis:Host"]!));
+            var redisHost = configurationManager["Redis:Host"]!;
+            Console.WriteLine($"Redis connection: {redisHost}");
+            services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisHost));
         }
 
         private static void AddServices(IServiceCollection services)
