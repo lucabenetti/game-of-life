@@ -22,22 +22,23 @@ namespace GameOfLife.Tests.Services
         public void ComputeNextState_ShouldReturnCorrectNextState_ForGliderPattern()
         {
             // Arrange
-            bool[][] initialState = new bool[][]
+            int[][] initialState = new int[][]
             {
-                new bool[] { false, true, false },
-                new bool[] { false, false, true },
-                new bool[] { true, true, true }
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 0, 1 },
+                new int[] { 1, 1, 1 }
             };
 
-            bool[][] expectedNextState = new bool[][]
+            int[][] expectedNextState = new int[][]
             {
-                new bool[] { false, false, false },
-                new bool[] { true, false, true },
-                new bool[] { false, true, true }
+                new int[] { 0, 0, 0 },
+                new int[] { 1, 0, 1 },
+                new int[] { 0, 1, 1 }
             };
+
 
             // Act
-            bool[][] nextState = _gameOfLifeComputeService.ComputeNextState(initialState);
+            int[][] nextState = _gameOfLifeComputeService.ComputeNextState(initialState);
 
             // Assert
             Assert.Equal(expectedNextState, nextState);
@@ -47,16 +48,17 @@ namespace GameOfLife.Tests.Services
         public void ComputeNextState_ShouldReturnSameState_ForBlockPattern()
         {
             // Arrange
-            bool[][] initialState = new bool[][]
+            int[][] initialState = new int[][]
             {
-                new bool[] { false, false, false, false },
-                new bool[] { false, true, true, false },
-                new bool[] { false, true, true, false },
-                new bool[] { false, false, false, false }
+                new int[] { 0, 0, 0, 0 },
+                new int[] { 0, 1, 1, 0 },
+                new int[] { 0, 1, 1, 0 },
+                new int[] { 0, 0, 0, 0 }
             };
 
+
             // Act
-            bool[][] nextState = _gameOfLifeComputeService.ComputeNextState(initialState);
+            int[][] nextState = _gameOfLifeComputeService.ComputeNextState(initialState);
 
             // Assert
             Assert.Equal(initialState, nextState);
@@ -66,22 +68,22 @@ namespace GameOfLife.Tests.Services
         public void ComputeNextState_ShouldReturnCorrectNextState_ForBlinkerPattern()
         {
             // Arrange
-            bool[][] initialState = new bool[][]
+            int[][] initialState = new int[][]
             {
-                new bool[] { false, false, false },
-                new bool[] { true, true, true },
-                new bool[] { false, false, false }
+                new int[] { 0, 0, 0 },
+                new int[] { 1, 1, 1 },
+                new int[] { 0, 0, 0 }
             };
 
-            bool[][] expectedNextState = new bool[][]
+            int[][] expectedNextState = new int[][]
             {
-                new bool[] { false, true, false },
-                new bool[] { false, true, false },
-                new bool[] { false, true, false }
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 1, 0 }
             };
 
             // Act
-            bool[][] nextState = _gameOfLifeComputeService.ComputeNextState(initialState);
+            int[][] nextState = _gameOfLifeComputeService.ComputeNextState(initialState);
 
             // Assert
             Assert.Equal(expectedNextState, nextState);
@@ -101,7 +103,7 @@ namespace GameOfLife.Tests.Services
         public void ComputeNextState_ShouldReturnNull_WhenBoardIsEmpty()
         {
             // Arrange
-            bool[][] emptyBoard = new bool[][] { };
+            int[][] emptyBoard = new int[][] { };
 
             // Act
             var result = _gameOfLifeComputeService.ComputeNextState(emptyBoard);
@@ -114,10 +116,10 @@ namespace GameOfLife.Tests.Services
         public void ComputeNextState_ShouldReturnNull_WhenBoardHasInconsistentRowSizes()
         {
             // Arrange
-            bool[][] inconsistentBoard = new bool[][]
+            int[][] inconsistentBoard = new int[][]
             {
-                new bool[] { true, false },
-                new bool[] { true, false, true }
+                new int[] { 1, 0 },
+                new int[] { 1, 0, 1 }
             };
 
             // Act
@@ -131,12 +133,13 @@ namespace GameOfLife.Tests.Services
         public void ComputeNextState_ShouldReturnCachedState_WhenStateAlreadyComputed()
         {
             // Arrange
-            bool[][] board = new bool[][]
+            int[][] board = new int[][]
             {
-                new bool[] { false, true, false },
-                new bool[] { false, false, true },
-                new bool[] { true, true, true }
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 0, 1 },
+                new int[] { 1, 1, 1 }
             };
+
 
             // Act
             var firstCall = _gameOfLifeComputeService.ComputeNextState(board);
@@ -150,11 +153,11 @@ namespace GameOfLife.Tests.Services
         public void CountAliveNeighbors_ShouldReturnCorrectCount()
         {
             // Arrange
-            bool[][] board = new bool[][]
+            int[][] board = new int[][]
             {
-                new bool[] { false, true, false },
-                new bool[] { false, false, true },
-                new bool[] { true, true, true }
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 0, 1 },
+                new int[] { 1, 1, 1 }
             };
 
             // Act & Assert
@@ -167,11 +170,11 @@ namespace GameOfLife.Tests.Services
         public void CountAliveNeighbors_ShouldReturnZero_WhenCellIsOutOfBounds()
         {
             // Arrange
-            bool[][] board = new bool[][]
+            int[][] board = new int[][]
             {
-                new bool[] { false, true, false },
-                new bool[] { false, false, true },
-                new bool[] { true, true, true }
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 0, 1 },
+                new int[] { 1, 1, 1 }
             };
 
             // Act
@@ -185,18 +188,18 @@ namespace GameOfLife.Tests.Services
         public void GetBoardHash_ShouldReturnSameHash_ForIdenticalBoards()
         {
             // Arrange
-            bool[][] board1 = new bool[][]
+            int[][] board1 = new int[][]
             {
-                new bool[] { false, true, false },
-                new bool[] { false, false, true },
-                new bool[] { true, true, true }
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 1, 1 },
+                new int[] { 1, 1, 1 }
             };
 
-            bool[][] board2 = new bool[][]
+            int[][] board2 = new int[][]
             {
-                new bool[] { false, true, false },
-                new bool[] { false, false, true },
-                new bool[] { true, true, true }
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 1, 1 },
+                new int[] { 1, 1, 1 }
             };
 
             // Act
@@ -211,19 +214,20 @@ namespace GameOfLife.Tests.Services
         public void GetBoardHash_ShouldReturnDifferentHash_ForDifferentBoards()
         {
             // Arrange
-            bool[][] board1 = new bool[][]
+            int[][] board1 = new int[][]
             {
-                new bool[] { false, true, false },
-                new bool[] { false, false, true },
-                new bool[] { true, true, true }
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 0, 1 },
+                new int[] { 1, 1, 1 }
             };
 
-            bool[][] board2 = new bool[][]
+            int[][] board2 = new int[][]
             {
-                new bool[] { false, true, false },
-                new bool[] { false, true, true },
-                new bool[] { true, true, true }
+                new int[] { 0, 1, 0 },
+                new int[] { 0, 1, 1 },
+                new int[] { 1, 1, 1 }
             };
+
 
             // Act
             int hash1 = _gameOfLifeComputeService.GetBoardHash(board1);

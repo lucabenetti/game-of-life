@@ -13,12 +13,12 @@ namespace GameOfLife.API.Services.Interfaces
         /// Uploads a new Game of Life board and stores it in memory or a persistent store.
         /// Performs validation on board size and structure.
         /// </summary>
-        /// <param name="board">The initial state of the board as a 2D boolean array.</param>
+        /// <param name="board">The initial state of the board as a 2D integer array.</param>
         /// <returns>
         /// A <see cref="Result{T}"/> containing the unique <see cref="Guid"/> representing the stored board 
         /// if successful, or an error message if validation fails.
         /// </returns>
-        Task<Result<Guid>> UploadBoard(bool[][] board);
+        Task<Result<Guid>> UploadBoard(int[][] board);
 
         /// <summary>
         /// Computes and retrieves the next state of the board associated with the given identifier.
@@ -26,10 +26,10 @@ namespace GameOfLife.API.Services.Interfaces
         /// </summary>
         /// <param name="id">The unique identifier of the board.</param>
         /// <returns>
-        /// A <see cref="Result{T}"/> containing the next state of the board as a 2D boolean array
+        /// A <see cref="Result{T}"/> containing the next state of the board as a 2D integer array
         /// if successful, or an error message if the board is not found.
         /// </returns>
-        Task<Result<bool[][]>> GetNextState(Guid id);
+        Task<Result<int[][]>> GetNextState(Guid id);
 
         /// <summary>
         /// Computes the board state iteratively until a stable or repeating pattern is detected,

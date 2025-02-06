@@ -13,7 +13,7 @@ namespace GameOfLife.API.Services
     /// </summary>
     public class GameOfLifeComputeService : IGameOfLifeComputeService
     {
-        private readonly Dictionary<int, bool[][]> _stateCache = new();
+        private readonly Dictionary<int, int[][]> _stateCache = new();
         private readonly ILogger<GameOfLifeComputeService> _logger;
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace GameOfLife.API.Services
         }
 
         /// <inheritdoc />
-        public bool[][] ComputeNextState(bool[][] board)
+        public int[][] ComputeNextState(int[][] board)
         {
             try
             {
@@ -45,16 +45,16 @@ namespace GameOfLife.API.Services
 
                 int rows = board.Length;
                 int cols = board[0].Length;
-                bool[][] nextState = CreateEmptyBoard(rows, cols);
+                int[][] nextState = CreateEmptyBoard(rows, cols);
 
                 for (int i = 0; i < rows; i++)
                 {
                     for (int j = 0; j < cols; j++)
                     {
                         int aliveNeighbors = CountAliveNeighbors(board, i, j);
-                        nextState[i][j] = board[i][j]
-                            ? (aliveNeighbors >= GameOfLifeComputeConstants.MinSurvivalNeighbors && aliveNeighbors <= GameOfLifeComputeConstants.MaxSurvivalNeighbors)
-                            : (aliveNeighbors == GameOfLifeComputeConstants.RequiredReproductionNeighbors);
+                        nextState[i][j] = board[i][j] == 1
+                            ? (aliveNeighbors >= GameOfLifeComputeConstants.MinSurvivalNeighbors && aliveNeighbors <= GameOfLifeComputeConstants.MaxSurvivalNeighbors ? 1 : 0)
+                            : (aliveNeighbors == GameOfLifeComputeConstants.RequiredReproductionNeighbors ? 1 : 0);
                     }
                 }
 
@@ -70,7 +70,7 @@ namespace GameOfLife.API.Services
         }
 
         /// <inheritdoc />
-        public int GetBoardHash(bool[][] board)
+        public int GetBoardHash(int[][] board)
         {
             try
             {
@@ -85,7 +85,7 @@ namespace GameOfLife.API.Services
                 {
                     foreach (var cell in row)
                     {
-                        hash = hash * GameOfLifeComputeConstants.HashMultiplier + (cell ? GameOfLifeComputeConstants.AliveCellValue : GameOfLifeComputeConstants.DeadCellValue);
+                        hash = hash * GameOfLifeComputeConstants.HashMultiplier + (cell == 1 ? GameOfLifeComputeConstants.AliveCellValue : GameOfLifeComputeConstants.DeadCellValue);
                     }
                 }
 
@@ -99,7 +99,7 @@ namespace GameOfLife.API.Services
         }
 
         /// <inheritdoc />
-        public int CountAliveNeighbors(bool[][] board, int x, int y)
+        public int CountAliveNeighbors(int[][] board, int x, int y)
         {
             try
             {
@@ -109,14 +109,15 @@ namespace GameOfLife.API.Services
                     return 0;
                 }
 
-                if (x < 0 || y < 0 || x >= board.Length || y >= board[0].Length)
+                int rows = board.Length;
+                int cols = board[0].Length;
+
+                if (x < 0 || x >= rows || y < 0 || y >= cols)
                 {
                     _logger.LogWarning(ValidationMessages.CountAliveNeighborsFailed, string.Format(ValidationMessages.InvalidCellCoordinates, x, y));
                     return 0;
                 }
 
-                int rows = board.Length;
-                int cols = board[0].Length;
                 int count = 0;
 
                 for (int i = 0; i < GameOfLifeComputeConstants.TotalNeighbors; i++)
@@ -124,7 +125,7 @@ namespace GameOfLife.API.Services
                     int nx = x + GameOfLifeComputeConstants.NeighborXOffsets[i];
                     int ny = y + GameOfLifeComputeConstants.NeighborYOffsets[i];
 
-                    if (nx >= 0 && nx < rows && ny >= 0 && ny < cols && board[nx][ny])
+                    if (nx >= 0 && nx < rows && ny >= 0 && ny < cols && board[nx][ny] == 1)
                     {
                         count++;
                     }
@@ -142,7 +143,7 @@ namespace GameOfLife.API.Services
         /// <summary>
         /// Validates if a board is well-formed and has consistent row sizes.
         /// </summary>
-        private bool IsValidBoard(bool[][] board)
+        private bool IsValidBoard(int[][] board)
         {
             if (board == null)
             {
@@ -175,9 +176,9 @@ namespace GameOfLife.API.Services
         /// <summary>
         /// Creates an empty board with the specified dimensions.
         /// </summary>
-        private bool[][] CreateEmptyBoard(int rows, int cols)
+        private int[][] CreateEmptyBoard(int rows, int cols)
         {
-            return Enumerable.Range(0, rows).Select(_ => new bool[cols]).ToArray();
+            return Enumerable.Range(0, rows).Select(_ => new int[cols]).ToArray();
         }
     }
 }

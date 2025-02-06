@@ -37,18 +37,16 @@ namespace GameOfLife.API.Services
         }
 
         /// <inheritdoc />
-        public async Task<Result<Guid>> UploadBoard(bool[][] board)
+        public async Task<Result<Guid>> UploadBoard(int[][] board)
         {
             try
             {
-                // Validate board existence
                 if (board == null)
                 {
                     _logger.LogWarning(ValidationMessages.UploadFailed, ValidationMessages.NullBoard);
                     return Result<Guid>.Failure(ValidationMessages.NullBoard);
                 }
 
-                // Validate board is not empty
                 if (board.Length == 0 || board[0] == null || board[0].Length == 0)
                 {
                     _logger.LogWarning(ValidationMessages.UploadFailed, ValidationMessages.EmptyBoard);
@@ -58,14 +56,12 @@ namespace GameOfLife.API.Services
                 int rows = board.Length;
                 int cols = board[0].Length;
 
-                // Validate board size
                 if (rows > _settings.MaxBoardHeight || cols > _settings.MaxBoardWidth)
                 {
                     _logger.LogWarning(ValidationMessages.UploadFailed, ValidationMessages.BoardSizeExceeded);
                     return Result<Guid>.Failure(string.Format(ValidationMessages.BoardSizeExceeded, _settings.MaxBoardHeight, _settings.MaxBoardWidth));
                 }
 
-                // Validate board structure (null rows or inconsistent row sizes)
                 for (int i = 0; i < rows; i++)
                 {
                     if (board[i] == null || board[i].Length != cols)
@@ -75,8 +71,7 @@ namespace GameOfLife.API.Services
                     }
                 }
 
-                // Validate board contains at least one live cell
-                if (board.All(row => row.All(cell => !cell)))
+                if (board.All(row => row.All(cell => cell == 0)))
                 {
                     _logger.LogWarning(ValidationMessages.UploadFailed, ValidationMessages.EmptyBoard);
                     return Result<Guid>.Failure(ValidationMessages.EmptyBoard);
@@ -96,26 +91,26 @@ namespace GameOfLife.API.Services
         }
 
         /// <inheritdoc />
-        public async Task<Result<bool[][]>> GetNextState(Guid id)
+        public async Task<Result<int[][]>> GetNextState(Guid id)
         {
             try
             {
                 if (id == Guid.Empty)
                 {
                     _logger.LogWarning(ValidationMessages.ValidationFailed, ValidationMessages.InvalidGuid);
-                    return Result<bool[][]>.Failure(ValidationMessages.InvalidGuid);
+                    return Result<int[][]>.Failure(ValidationMessages.InvalidGuid);
                 }
 
                 var gameBoard = await _repository.GetBoard(id);
                 if (gameBoard == null)
                 {
                     _logger.LogWarning(ValidationMessages.ValidationFailed, ValidationMessages.BoardNotFound);
-                    return Result<bool[][]>.Failure(ValidationMessages.BoardNotFound);
+                    return Result<int[][]>.Failure(ValidationMessages.BoardNotFound);
                 }
 
                 if (IsBoardEmpty(gameBoard.Board))
                 {
-                    return Result<bool[][]>.Success(gameBoard.Board);
+                    return Result<int[][]>.Success(gameBoard.Board);
                 }
 
                 var nextState = _computeService.ComputeNextState(gameBoard.Board);
@@ -123,12 +118,12 @@ namespace GameOfLife.API.Services
                 await _repository.SaveBoard(gameBoard);
 
                 _logger.LogInformation("Next state computed successfully for ID: {id}", id);
-                return Result<bool[][]>.Success(nextState);
+                return Result<int[][]>.Success(nextState);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ValidationMessages.NextStateFailed);
-                return Result<bool[][]>.Failure(ValidationMessages.NextStateFailed);
+                return Result<int[][]>.Failure(ValidationMessages.NextStateFailed);
             }
         }
 
@@ -163,7 +158,7 @@ namespace GameOfLife.API.Services
                     if (seenStates.Contains(hash))
                     {
                         _logger.LogInformation("Final state reached for ID: {id} in {attempts} attempts.", id, i);
-                        return Result<FinalStateResultDto>.Success(new FinalStateResultDto (gameBoard.Board, true));
+                        return Result<FinalStateResultDto>.Success(new FinalStateResultDto(gameBoard.Board, true));
                     }
 
                     seenStates.Add(hash);
@@ -183,9 +178,9 @@ namespace GameOfLife.API.Services
         /// <summary>
         /// Checks whether the board is completely empty (all cells are dead).
         /// </summary>
-        private bool IsBoardEmpty(bool[][] board)
+        private bool IsBoardEmpty(int[][] board)
         {
-            return board.All(row => row.All(cell => !cell));
+            return board.All(row => row.All(cell => cell == 0));
         }
     }
 }
