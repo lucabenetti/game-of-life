@@ -1,8 +1,15 @@
 ﻿using Moq;
+using GameOfLife.API.Configurations;
+using GameOfLife.API.DTOs;
 using GameOfLife.API.Models;
 using GameOfLife.API.Repositories.Interfaces;
 using GameOfLife.API.Services;
 using GameOfLife.API.Services.Interfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace GameOfLife.Tests.Services
 {
@@ -10,13 +17,24 @@ namespace GameOfLife.Tests.Services
     {
         private readonly Mock<IGameOfLifeRepository> _repositoryMock;
         private readonly Mock<IGameOfLifeComputeService> _computeServiceMock;
+        private readonly Mock<ILogger<GameOfLifeService>> _loggerMock;
         private readonly GameOfLifeService _gameOfLifeService;
 
         public GameOfLifeServiceTests()
         {
             _repositoryMock = new Mock<IGameOfLifeRepository>();
             _computeServiceMock = new Mock<IGameOfLifeComputeService>();
-            _gameOfLifeService = new GameOfLifeService(_repositoryMock.Object, _computeServiceMock.Object);
+            _loggerMock = new Mock<ILogger<GameOfLifeService>>();
+
+            var settings = Options.Create(new GameOfLifeSettings
+            {
+                DefaultMaxAttempts = 200,
+                MaxAllowedAttempts = 1000,
+                MaxBoardWidth = 500,
+                MaxBoardHeight = 500
+            });
+
+            _gameOfLifeService = new GameOfLifeService(_repositoryMock.Object, _computeServiceMock.Object, settings, _loggerMock.Object);
         }
 
         [Fact]
@@ -34,8 +52,22 @@ namespace GameOfLife.Tests.Services
             var result = await _gameOfLifeService.UploadBoard(board);
 
             // Assert
+            Assert.True(result.IsSuccess);
             _repositoryMock.Verify(r => r.SaveBoard(It.IsAny<GameOfLifeBoard>()), Times.Once);
-            Assert.NotEqual(Guid.Empty, result);
+        }
+
+        [Fact]
+        public async Task UploadBoard_ShouldFail_WhenBoardIsEmpty()
+        {
+            // Arrange
+            bool[][] board = new bool[][] { };
+
+            // Act
+            var result = await _gameOfLifeService.UploadBoard(board);
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Equal("The board cannot be null or empty.", result.Error);
         }
 
         [Fact]
@@ -65,12 +97,13 @@ namespace GameOfLife.Tests.Services
             var result = await _gameOfLifeService.GetNextState(Guid.NewGuid());
 
             // Assert
-            Assert.Equal(nextState, result);
+            Assert.True(result.IsSuccess);
+            Assert.Equal(nextState, result.Value);
             _repositoryMock.Verify(r => r.SaveBoard(It.Is<GameOfLifeBoard>(b => b.Board == nextState)), Times.Once);
         }
 
         [Fact]
-        public async Task GetNextState_ShouldReturnNull_WhenBoardDoesNotExist()
+        public async Task GetNextState_ShouldFail_WhenBoardDoesNotExist()
         {
             // Arrange
             _repositoryMock.Setup(r => r.GetBoard(It.IsAny<Guid>())).ReturnsAsync((GameOfLifeBoard?)null);
@@ -79,7 +112,8 @@ namespace GameOfLife.Tests.Services
             var result = await _gameOfLifeService.GetNextState(Guid.NewGuid());
 
             // Assert
-            Assert.Null(result);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Board not found.", result.Error);
         }
 
         [Fact]
@@ -103,12 +137,13 @@ namespace GameOfLife.Tests.Services
             var result = await _gameOfLifeService.GetFinalState(Guid.NewGuid(), 5);
 
             // Assert
-            Assert.True(result.Completed);
-            Assert.Equal(initialState, result.Board);
+            Assert.True(result.IsSuccess);
+            Assert.True(result.Value.Completed);
+            Assert.Equal(initialState, result.Value.Board);
         }
 
         [Fact]
-        public async Task GetFinalState_ShouldReturnNullBoard_WhenMaxAttemptsExceeded()
+        public async Task GetFinalState_ShouldFail_WhenMaxAttemptsExceeded()
         {
             // Arrange
             var initialState = new bool[][]
@@ -139,12 +174,12 @@ namespace GameOfLife.Tests.Services
             var result = await _gameOfLifeService.GetFinalState(Guid.NewGuid(), 1);
 
             // Assert
-            Assert.False(result.Completed);
-            Assert.Null(result.Board);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("No final state reached within the given attempts.", result.Error);
         }
 
         [Fact]
-        public async Task GetFinalState_ShouldReturnNull_WhenBoardDoesNotExist()
+        public async Task GetFinalState_ShouldFail_WhenBoardDoesNotExist()
         {
             // Arrange
             _repositoryMock.Setup(r => r.GetBoard(It.IsAny<Guid>())).ReturnsAsync((GameOfLifeBoard?)null);
@@ -153,8 +188,19 @@ namespace GameOfLife.Tests.Services
             var result = await _gameOfLifeService.GetFinalState(Guid.NewGuid(), 5);
 
             // Assert
-            Assert.False(result.Completed);
-            Assert.Null(result.Board);
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Board not found.", result.Error);
+        }
+
+        [Fact]
+        public async Task GetFinalState_ShouldFail_WhenMaxAttemptsExceedsLimit()
+        {
+            // Act
+            var result = await _gameOfLifeService.GetFinalState(Guid.NewGuid(), 5000);
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Equal("maxAttempts must be between 1 and 1000.", result.Error);
         }
     }
 }
