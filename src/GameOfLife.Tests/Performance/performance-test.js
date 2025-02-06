@@ -22,7 +22,7 @@ export default function () {
             [0, 1, 0]
         ];
 
-    let res = http.post('https://localhost:7121/api/gameoflife/upload', JSON.stringify(board), {
+    let res = http.post('http://localhost:5000/api/gameoflife/upload', JSON.stringify(board), {
         headers: { 'Content-Type': 'application/json' }
     });
 
