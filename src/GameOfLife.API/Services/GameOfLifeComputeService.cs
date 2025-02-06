@@ -3,43 +3,49 @@ using GameOfLife.API.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GameOfLife.API.Services
 {
+    /// <summary>
+    /// Service responsible for computing the next state of the Game of Life grid.
+    /// Implements memoization to cache previously computed states for efficiency.
+    /// </summary>
     public class GameOfLifeComputeService : IGameOfLifeComputeService
     {
         private readonly Dictionary<int, bool[][]> _stateCache = new();
         private readonly ILogger<GameOfLifeComputeService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GameOfLifeComputeService"/> class.
+        /// </summary>
+        /// <param name="logger">Logger for tracking service operations.</param>
         public GameOfLifeComputeService(ILogger<GameOfLifeComputeService> logger)
         {
             _logger = logger;
         }
 
+        /// <inheritdoc />
         public bool[][] ComputeNextState(bool[][] board)
         {
             try
             {
-                if (board == null || board.Length == 0 || board[0] == null)
+                if (!IsValidBoard(board))
                 {
-                    _logger.LogWarning("ComputeNextState failed: Board is null or empty.");
+                    _logger.LogWarning(ValidationMessages.ComputeNextStateFailed, ValidationMessages.InvalidBoardStructure);
                     return null;
                 }
 
                 int boardHash = GetBoardHash(board);
                 if (_stateCache.TryGetValue(boardHash, out var cachedState))
                 {
-                    _logger.LogInformation("Returning cached board state.");
+                    _logger.LogInformation(ValidationMessages.BoardStateCacheUsed);
                     return cachedState;
                 }
 
                 int rows = board.Length;
                 int cols = board[0].Length;
-                bool[][] nextState = new bool[rows][];
-                for (int i = 0; i < rows; i++)
-                {
-                    nextState[i] = new bool[cols];
-                }
+                bool[][] nextState = CreateEmptyBoard(rows, cols);
 
                 for (int i = 0; i < rows; i++)
                 {
@@ -53,31 +59,30 @@ namespace GameOfLife.API.Services
                 }
 
                 _stateCache[boardHash] = nextState;
-                _logger.LogInformation("Next state computed successfully.");
+                _logger.LogInformation(ValidationMessages.BoardStateComputed);
                 return nextState;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while computing the next state.");
+                _logger.LogError(ex, ValidationMessages.StateComputationError);
                 return null;
             }
         }
 
+        /// <inheritdoc />
         public int GetBoardHash(bool[][] board)
         {
             try
             {
-                if (board == null)
+                if (!IsValidBoard(board))
                 {
-                    _logger.LogWarning("GetBoardHash failed: Board is null.");
+                    _logger.LogWarning(ValidationMessages.GetBoardHashFailed, ValidationMessages.InvalidBoardStructure);
                     return 0;
                 }
 
                 int hash = GameOfLifeComputeConstants.HashSeed;
                 foreach (var row in board)
                 {
-                    if (row == null) continue;
-
                     foreach (var cell in row)
                     {
                         hash = hash * GameOfLifeComputeConstants.HashMultiplier + (cell ? GameOfLifeComputeConstants.AliveCellValue : GameOfLifeComputeConstants.DeadCellValue);
@@ -88,18 +93,25 @@ namespace GameOfLife.API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while generating board hash.");
+                _logger.LogError(ex, ValidationMessages.HashGenerationError);
                 return 0;
             }
         }
 
+        /// <inheritdoc />
         public int CountAliveNeighbors(bool[][] board, int x, int y)
         {
             try
             {
-                if (board == null || board.Length == 0 || board[0] == null)
+                if (!IsValidBoard(board))
                 {
-                    _logger.LogWarning("CountAliveNeighbors failed: Board is null or empty.");
+                    _logger.LogWarning(ValidationMessages.CountAliveNeighborsFailed, ValidationMessages.InvalidBoardStructure);
+                    return 0;
+                }
+
+                if (x < 0 || y < 0 || x >= board.Length || y >= board[0].Length)
+                {
+                    _logger.LogWarning(ValidationMessages.CountAliveNeighborsFailed, string.Format(ValidationMessages.InvalidCellCoordinates, x, y));
                     return 0;
                 }
 
@@ -122,9 +134,50 @@ namespace GameOfLife.API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while counting alive neighbors.");
+                _logger.LogError(ex, ValidationMessages.CountAliveNeighborsError);
                 return 0;
             }
+        }
+
+        /// <summary>
+        /// Validates if a board is well-formed and has consistent row sizes.
+        /// </summary>
+        private bool IsValidBoard(bool[][] board)
+        {
+            if (board == null)
+            {
+                _logger.LogWarning(ValidationMessages.ValidationFailed, ValidationMessages.NullBoard);
+                return false;
+            }
+
+            if (board.Length == 0)
+            {
+                _logger.LogWarning(ValidationMessages.ValidationFailed, ValidationMessages.EmptyBoard);
+                return false;
+            }
+
+            if (board.Any(row => row == null))
+            {
+                _logger.LogWarning(ValidationMessages.ValidationFailed, ValidationMessages.NullBoardRows);
+                return false;
+            }
+
+            int cols = board[0].Length;
+            if (cols == 0 || board.Any(row => row.Length != cols))
+            {
+                _logger.LogWarning(ValidationMessages.ValidationFailed, ValidationMessages.InvalidBoardStructure);
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Creates an empty board with the specified dimensions.
+        /// </summary>
+        private bool[][] CreateEmptyBoard(int rows, int cols)
+        {
+            return Enumerable.Range(0, rows).Select(_ => new bool[cols]).ToArray();
         }
     }
 }
