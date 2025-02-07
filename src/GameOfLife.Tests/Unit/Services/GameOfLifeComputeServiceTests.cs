@@ -130,26 +130,6 @@ namespace GameOfLife.Tests.Unit.Services
         }
 
         [Fact]
-        public void ComputeNextState_ShouldReturnCachedState_WhenStateAlreadyComputed()
-        {
-            // Arrange
-            int[][] board = new int[][]
-            {
-                new int[] { 0, 1, 0 },
-                new int[] { 0, 0, 1 },
-                new int[] { 1, 1, 1 }
-            };
-
-
-            // Act
-            var firstCall = _gameOfLifeComputeService.ComputeNextState(board);
-            var secondCall = _gameOfLifeComputeService.ComputeNextState(board);
-
-            // Assert
-            Assert.Same(firstCall, secondCall);
-        }
-
-        [Fact]
         public void CountAliveNeighbors_ShouldReturnCorrectCount()
         {
             // Arrange

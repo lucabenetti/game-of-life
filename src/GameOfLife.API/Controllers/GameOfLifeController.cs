@@ -1,9 +1,7 @@
-﻿using GameOfLife.API.DTOs;
-using GameOfLife.API.Models;
+﻿using GameOfLife.API.Constants;
+using GameOfLife.API.DTOs;
 using GameOfLife.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
 
 namespace GameOfLife.API.Controllers
 {
@@ -24,10 +22,10 @@ namespace GameOfLife.API.Controllers
             var result = await _gameOfLifeService.UploadBoard(board);
             if (!result.IsSuccess)
             {
-                return BadRequest(new ApiResponse<Guid>(default, result.ErrorMessage, false));
+                return BadRequest(ApiResponse<int[][]>.FailureResponse(result.ErrorMessage));
             }
 
-            return CreatedAtAction(nameof(GetNextState), new { id = result.Value }, new ApiResponse<Guid>(result.Value, "Board uploaded successfully."));
+            return CreatedAtAction(nameof(GetNextState), new { id = result.Value }, ApiResponse<Guid>.SuccessResponse(result.Value, ApiResponseMessages.BoardUploadedSuccessfully));
         }
 
         [HttpGet("{id}/next")]
@@ -36,10 +34,10 @@ namespace GameOfLife.API.Controllers
             var result = await _gameOfLifeService.GetNextState(id);
             if (!result.IsSuccess)
             {
-                return NotFound(new ApiResponse<int[][]>(null, result.ErrorMessage, false));
+                return NotFound(ApiResponse<int[][]>.FailureResponse(result.ErrorMessage));
             }
 
-            return Ok(new ApiResponse<int[][]>(result.Value, "Next state computed successfully."));
+            return Ok(ApiResponse<int[][]>.SuccessResponse(result.Value, ApiResponseMessages.NextStateComputedSuccessfully));
         }
 
         [HttpGet("{id}/final/{maxAttempts}")]
@@ -48,10 +46,10 @@ namespace GameOfLife.API.Controllers
             var result = await _gameOfLifeService.GetFinalState(id, maxAttempts);
             if (!result.IsSuccess)
             {
-                return BadRequest(new ApiResponse<FinalStateResultDto>(null, result.ErrorMessage, false));
+                return BadRequest(ApiResponse<int[][]>.FailureResponse(result.ErrorMessage));
             }
 
-            return Ok(new ApiResponse<FinalStateResultDto>(result.Value, "Final state computation completed."));
+            return Ok(ApiResponse<FinalStateResultDto>.SuccessResponse(result.Value, ApiResponseMessages.FinalStateComputationCompleted));
         }
     }
 }
