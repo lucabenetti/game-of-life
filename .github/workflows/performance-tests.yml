@@ -35,17 +35,17 @@ jobs:
     - name: List Running Docker Containers
       run: docker ps -a
 
-    - name: Wait for Redis to Be Ready
+    - name: Test Redis Connectivity from Runner
       run: |
-        for i in {1..10}; do
-          if docker exec redis redis-cli ping | grep -q PONG; then
-            echo "Redis is ready."
+        for i in {1..5}; do
+          if nc -zv redis 6379; then
+            echo "Redis is reachable"
             exit 0
           fi
-          echo "Waiting for Redis to be ready..."
+          echo "Retrying Redis connection..."
           sleep 2
         done
-        echo "Redis failed to start."
+        echo "Redis is not reachable"
         exit 1
 
     - name: Change to Docker Directory and Build API Image
@@ -53,9 +53,11 @@ jobs:
         cd docker
         docker build -t gameoflife-api:latest -f ../src/GameOfLife.API/Dockerfile ../
 
-    - name: Start API Container
+    - name: Start API Container with Same Network as Redis
       run: |
-        docker run -d --name gameoflife-api -p 80:80 -p 443:443 --env Redis__Host=http://localhost:6379 gameoflife-api:latest
+        docker network create gameoflife-network
+        docker network connect gameoflife-network redis
+        docker run -d --name gameoflife-api --network gameoflife-network -p 80:80 -p 443:443 --env Redis__Host=redis gameoflife-api:latest
         sleep 10
         
     - name: Display API Logs
