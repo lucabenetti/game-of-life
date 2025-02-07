@@ -41,6 +41,9 @@ Swagger documentation will be available on http://localhost:5010/swagger.
 ## Architecture
 The API is designed following the Controller-Service-Repository pattern:
 
+![image](https://github.com/user-attachments/assets/5eb97610-b7bf-48c4-8be6-53662b967def)
+
+
 - **Controller (GameOfLifeController):** Handles API requests, validates input, and interacts with the service layer.
 
 - **Service (GameOfLifeService):** Contains business logic to process board states and interact with the repository.
