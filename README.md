@@ -116,3 +116,9 @@ The API is designed following the Controller-Service-Repository pattern:
 
 - Since multiple requests can update the board state concurrently, race conditions may occur when multiple clients request the next state or final state at the same time.
 To avoid race conditions, Redis transactions (MULTI/EXEC) can be used for atomic updates, optimistic locking with versioning, or distributed locking (Redlock) to prevent concurrent modifications. For large-scale applications, implement an event-driven approach (message queue) to process board updates sequentially. 
+
+### Testing and benchmarking
+- **GitHub Actions CI**: Runs **Unit Tests, Integration Tests (TestContainers), and Performance Tests (k6)** automatically on PRs.
+- **Integration Testing** with **TestContainers**: Uses real Redis instances for accurate testing.
+- **Performance Testing** with **k6**: Simulates high-load API scenarios.
+- **Benchmarking** with **BenchmarkDotNet**: Profiles performance, memory usage, and execution time.
