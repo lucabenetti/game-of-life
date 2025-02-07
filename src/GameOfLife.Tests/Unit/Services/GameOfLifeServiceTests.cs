@@ -223,5 +223,37 @@ namespace GameOfLife.Tests.Unit.Services
             Assert.False(result.IsSuccess);
             Assert.Equal(ValidationMessages.InvalidGuid, result.ErrorMessage);
         }
+
+        [Fact]
+        public async Task UploadBoard_ShouldReturnFailure_WhenBoardContainsInvalidValues()
+        {
+            int[][] board = new int[][]
+            {
+                new int[] { 1, 0, 2 }, // 2 is not valid
+                new int[] { 0, -1, 1 }, // -1 is not valid
+                new int[] { 1, 0, 1 }
+            };
+
+            var result = await _gameOfLifeService.UploadBoard(board);
+
+            Assert.False(result.IsSuccess);
+            Assert.Equal(ValidationMessages.InvalidCellValue, result.ErrorMessage);
+        }
+
+        [Fact]
+        public async Task UploadBoard_ShouldReturnFailure_WhenBoardIsAllDeadCells()
+        {
+            int[][] board = new int[][]
+            {
+                new int[] { 0, 0, 0 },
+                new int[] { 0, 0, 0 },
+                new int[] { 0, 0, 0 }
+            };
+
+            var result = await _gameOfLifeService.UploadBoard(board);
+
+            Assert.False(result.IsSuccess);
+            Assert.Equal(ValidationMessages.EmptyBoard, result.ErrorMessage);
+        }
     }
 }

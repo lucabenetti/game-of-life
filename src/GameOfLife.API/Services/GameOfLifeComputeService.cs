@@ -9,11 +9,9 @@ namespace GameOfLife.API.Services
 {
     /// <summary>
     /// Service responsible for computing the next state of the Game of Life grid.
-    /// Implements memoization to cache previously computed states for efficiency.
     /// </summary>
     public class GameOfLifeComputeService : IGameOfLifeComputeService
     {
-        private readonly Dictionary<int, int[][]> _stateCache = new();
         private readonly ILogger<GameOfLifeComputeService> _logger;
 
         /// <summary>
@@ -36,18 +34,12 @@ namespace GameOfLife.API.Services
                     return null;
                 }
 
-                int boardHash = GetBoardHash(board);
-                if (_stateCache.TryGetValue(boardHash, out var cachedState))
-                {
-                    _logger.LogInformation(ValidationMessages.BoardStateCacheUsed);
-                    return cachedState;
-                }
-
                 int rows = board.Length;
                 int cols = board[0].Length;
                 int[][] nextState = CreateEmptyBoard(rows, cols);
 
-                for (int i = 0; i < rows; i++)
+                // Parallel execution for each row
+                Parallel.For(0, rows, i =>
                 {
                     for (int j = 0; j < cols; j++)
                     {
@@ -56,9 +48,8 @@ namespace GameOfLife.API.Services
                             ? (aliveNeighbors >= GameOfLifeComputeConstants.MinSurvivalNeighbors && aliveNeighbors <= GameOfLifeComputeConstants.MaxSurvivalNeighbors ? 1 : 0)
                             : (aliveNeighbors == GameOfLifeComputeConstants.RequiredReproductionNeighbors ? 1 : 0);
                     }
-                }
+                });
 
-                _stateCache[boardHash] = nextState;
                 _logger.LogInformation(ValidationMessages.BoardStateComputed);
                 return nextState;
             }

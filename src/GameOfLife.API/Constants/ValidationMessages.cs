@@ -14,6 +14,7 @@
         public const string InvalidBoardStructure = "The board has an inconsistent row structure.";
         public const string InvalidBoardDimensions = "Board dimensions must be greater than zero.";
         public const string BoardSizeExceeded = "Board size exceeds limit. Max allowed size is {0} x {1}.";
+        public const string InvalidCellValue = "Board contains invalid values. Only 0 and 1 are allowed.";
 
         // Failure Messages
         public const string ComputeNextStateFailed = "ComputeNextState failed: {0}";

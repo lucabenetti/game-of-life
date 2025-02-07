@@ -71,6 +71,12 @@ namespace GameOfLife.API.Services
                     }
                 }
 
+                if (board.Any(row => row.Any(cell => cell != 0 && cell != 1)))
+                {
+                    _logger.LogWarning(ValidationMessages.UploadFailed, ValidationMessages.InvalidCellValue);
+                    return Result<Guid>.Failure(ValidationMessages.InvalidCellValue);
+                }
+
                 if (board.All(row => row.All(cell => cell == 0)))
                 {
                     _logger.LogWarning(ValidationMessages.UploadFailed, ValidationMessages.EmptyBoard);
@@ -80,7 +86,7 @@ namespace GameOfLife.API.Services
                 var gameBoard = new GameOfLifeBoard(board);
                 await _repository.SaveBoard(gameBoard);
 
-                _logger.LogInformation("Board uploaded successfully. ID: {id}", gameBoard.Id);
+                _logger.LogInformation(string.Format(LogInformationMessages.BoardUploadedSuccessfully, gameBoard.Id));
                 return Result<Guid>.Success(gameBoard.Id);
             }
             catch (Exception ex)
@@ -89,6 +95,7 @@ namespace GameOfLife.API.Services
                 return Result<Guid>.Failure(ValidationMessages.UnexpectedError);
             }
         }
+
 
         /// <inheritdoc />
         public async Task<Result<int[][]>> GetNextState(Guid id)
@@ -117,7 +124,7 @@ namespace GameOfLife.API.Services
                 gameBoard.Board = nextState;
                 await _repository.SaveBoard(gameBoard);
 
-                _logger.LogInformation("Next state computed successfully for ID: {id}", id);
+                _logger.LogInformation(string.Format(LogInformationMessages.NextStateComputedSuccessfully, id));
                 return Result<int[][]>.Success(nextState);
             }
             catch (Exception ex)
@@ -157,7 +164,7 @@ namespace GameOfLife.API.Services
                     int hash = _computeService.GetBoardHash(gameBoard.Board);
                     if (seenStates.Contains(hash))
                     {
-                        _logger.LogInformation("Final state reached for ID: {id} in {attempts} attempts.", id, i);
+                        _logger.LogInformation(string.Format(LogInformationMessages.FinalStateReached, id, i));
                         return Result<FinalStateResultDto>.Success(new FinalStateResultDto(gameBoard.Board, true));
                     }
 
