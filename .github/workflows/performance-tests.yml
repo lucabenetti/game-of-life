@@ -19,6 +19,7 @@ jobs:
         ports:
           - 6379:6379
         options: >-
+          --name redis
           --health-cmd "redis-cli ping"
           --health-interval 5s
           --health-timeout 5s
@@ -56,9 +57,6 @@ jobs:
       run: |
         docker run -d --name gameoflife-api -p 80:80 -p 443:443 --env Redis__Host=redis gameoflife-api:latest
         sleep 10
-        
-    - name: Display API Logs
-      run: docker logs gameoflife-api
 
     - name: Verify API is Running
       run: |
@@ -72,6 +70,9 @@ jobs:
         done
         echo "API failed to start"
         exit 1
+
+    - name: Display API Logs
+      run: docker logs gameoflife-api
 
     - name: Install K6
       run: |
