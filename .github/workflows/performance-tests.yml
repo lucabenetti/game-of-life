@@ -18,7 +18,11 @@ jobs:
         image: redis:7-alpine
         ports:
           - 6379:6379
-        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 5
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
     - name: Checkout Code
@@ -27,13 +31,8 @@ jobs:
     - name: Setup Docker BuildKit
       run: echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
 
-    - name: Change to Docker Directory and Build API Image
-      run: |
-        cd docker
-        docker build -t gameoflife-api:latest -f ../src/GameOfLife.API/Dockerfile ../
-
-    - name: Display Redis Logs
-      run: docker logs redis
+    - name: List Running Docker Containers
+      run: docker ps -a
 
     - name: Wait for Redis to Be Ready
       run: |
@@ -47,6 +46,11 @@ jobs:
         done
         echo "Redis failed to start."
         exit 1
+
+    - name: Change to Docker Directory and Build API Image
+      run: |
+        cd docker
+        docker build -t gameoflife-api:latest -f ../src/GameOfLife.API/Dockerfile ../
 
     - name: Start API Container
       run: |
