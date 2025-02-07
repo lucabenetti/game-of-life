@@ -13,17 +13,6 @@ on:
 jobs:
   performance-test:
     runs-on: ubuntu-latest
-    services:
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --name redis
-          --health-cmd "redis-cli ping"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
     - name: Checkout Code
@@ -32,20 +21,28 @@ jobs:
     - name: Setup Docker BuildKit
       run: echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
 
+    - name: Create Docker Network
+      run: docker network create gameoflife-network
+
+    - name: Start Redis Container
+      run: |
+        docker run -d --name redis --network gameoflife-network -p 6379:6379 redis:7-alpine
+        sleep 5
+
     - name: List Running Docker Containers
       run: docker ps -a
 
-    - name: Test Redis Connectivity from Runner
+    - name: Test Redis Connectivity from Docker Network
       run: |
         for i in {1..5}; do
-          if nc -zv redis 6379; then
-            echo "Redis is reachable"
+          if docker run --rm --network gameoflife-network busybox nc -zv redis 6379; then
+            echo "Redis is reachable within the Docker network"
             exit 0
           fi
           echo "Retrying Redis connection..."
           sleep 2
         done
-        echo "Redis is not reachable"
+        echo "Redis is not reachable within the network"
         exit 1
 
     - name: Change to Docker Directory and Build API Image
@@ -53,16 +50,14 @@ jobs:
         cd docker
         docker build -t gameoflife-api:latest -f ../src/GameOfLife.API/Dockerfile ../
 
-    - name: Start API Container with Same Network as Redis
+    - name: Start API Container in Same Network as Redis
       run: |
-        docker network create gameoflife-network
-        docker network connect gameoflife-network redis
         docker run -d --name gameoflife-api --network gameoflife-network -p 80:80 -p 443:443 --env Redis__Host=redis gameoflife-api:latest
         sleep 10
-        
+
     - name: Display API Logs
       run: docker logs gameoflife-api
-
+    
     - name: Verify API is Running
       run: |
         for i in {1..15}; do
@@ -91,4 +86,4 @@ jobs:
         API_URL: http://localhost:80
 
     - name: Cleanup Containers
-      run: docker stop gameoflife-api && docker rm gameoflife-api
+      run: docker stop gameoflife-api redis && docker rm gameoflife-api redis
