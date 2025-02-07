@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "GameOfLife.Benchmark": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
