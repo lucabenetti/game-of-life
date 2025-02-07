@@ -55,7 +55,7 @@ jobs:
 
     - name: Start API Container
       run: |
-        docker run -d --name gameoflife-api -p 80:80 -p 443:443 --env Redis__Host=localhost:6379 gameoflife-api:latest
+        docker run -d --name gameoflife-api -p 80:80 -p 443:443 --env Redis__Host=0.0.0.0:6379 gameoflife-api:latest
         sleep 10
         
     - name: Display API Logs
