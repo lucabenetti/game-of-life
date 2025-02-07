@@ -1,4 +1,4 @@
-name: Unit Tests
+﻿name: Performance Tests
 
 on:
   push:
@@ -11,23 +11,79 @@ on:
       - develop
 
 jobs:
-  unit-test:
+  performance-test:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 7.0.x
+    - name: Setup Docker BuildKit
+      run: echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
 
-    - name: Restore Dependencies
-      run: dotnet restore
+    - name: Create Docker Network
+      run: docker network create gameoflife-network
 
-    - name: Build Solution
-      run: dotnet build --configuration Release --no-restore
+    - name: Start Redis Container
+      run: |
+        docker run -d --name redis --network gameoflife-network -p 6379:6379 redis:7-alpine
+        sleep 5
 
-    - name: Run Unit Tests
-      run: dotnet test --configuration Release --no-restore --verbosity normal --filter "Category=Unit"
+    - name: List Running Docker Containers
+      run: docker ps -a
+
+    - name: Test Redis Connectivity from Docker Network
+      run: |
+        for i in {1..5}; do
+          if docker run --rm --network gameoflife-network busybox nc -zv redis 6379; then
+            echo "Redis is reachable within the Docker network"
+            exit 0
+          fi
+          echo "Retrying Redis connection..."
+          sleep 2
+        done
+        echo "Redis is not reachable within the network"
+        exit 1
+
+    - name: Change to Docker Directory and Build API Image
+      run: |
+        cd docker
+        docker build -t gameoflife-api:latest -f ../src/GameOfLife.API/Dockerfile ../
+
+    - name: Start API Container in Same Network as Redis
+      run: |
+        docker run -d --name gameoflife-api --network gameoflife-network -p 80:80 -p 443:443 --env Redis__Host=redis gameoflife-api:latest
+        sleep 10
+
+    - name: Display API Logs
+      run: docker logs gameoflife-api
+    
+    - name: Verify API is Running
+      run: |
+        for i in {1..15}; do
+          if curl --silent --fail http://localhost:80/health; then
+            echo "API is running on http://localhost:80"
+            exit 0
+          fi
+          echo "Waiting for API to be ready..."
+          sleep 5
+        done
+        echo "API failed to start"
+        exit 1
+
+    - name: Install K6
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gnupg software-properties-common
+        curl -fsSL https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/k6-archive-keyring.gpg
+        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install -y k6
+
+    - name: Run Performance Test
+      run: k6 run ./src/GameOfLife.Tests/Performance/performance-test.js
+      env:
+        API_URL: http://localhost:80
+
+    - name: Cleanup Containers
+      run: docker stop gameoflife-api redis && docker rm gameoflife-api redis

@@ -14,6 +14,7 @@ namespace GameOfLife.API
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddHealthChecks();
 
             builder.Services.RegisterServices(builder.Configuration);
 
@@ -25,6 +26,8 @@ namespace GameOfLife.API
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
+
+            app.MapHealthChecks("/health");
 
             app.MapControllers();
 
