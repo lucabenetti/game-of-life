@@ -27,17 +27,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameOfLife.Tests", "src\GameOfLife.Tests\GameOfLife.Tests.csproj", "{73819255-A663-4F8D-B023-A81BB4ED76AE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample_upload_payloads", "sample_upload_payloads", "{F0C4EAF3-9E5D-4011-8FFD-2953D5886C7D}"
-	ProjectSection(SolutionItems) = preProject
-		docs\sample_upload_payloads\blinker.json = docs\sample_upload_payloads\blinker.json
-		docs\sample_upload_payloads\empty_board.json = docs\sample_upload_payloads\empty_board.json
-		docs\sample_upload_payloads\game_of_life_input500x500.json = docs\sample_upload_payloads\game_of_life_input500x500.json
-		docs\sample_upload_payloads\game_of_life_input50x50.json = docs\sample_upload_payloads\game_of_life_input50x50.json
-		docs\sample_upload_payloads\lwss.json = docs\sample_upload_payloads\lwss.json
-		docs\sample_upload_payloads\single_cell.json = docs\sample_upload_payloads\single_cell.json
-		docs\sample_upload_payloads\small_glider.json = docs\sample_upload_payloads\small_glider.json
-		docs\sample_upload_payloads\still_life.json = docs\sample_upload_payloads\still_life.json
-		docs\sample_upload_payloads\toad.json = docs\sample_upload_payloads\toad.json
-	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Benchmark", "Benchmark", "{DD30251E-8924-4130-9FBB-9726B27DEC83}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameOfLife.Benchmark", "src\GameOfLife.Benchmark\GameOfLife.Benchmark.csproj", "{27D462FC-9E9A-4204-A3B4-5228EBA54D58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +46,10 @@ Global
 		{73819255-A663-4F8D-B023-A81BB4ED76AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73819255-A663-4F8D-B023-A81BB4ED76AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73819255-A663-4F8D-B023-A81BB4ED76AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27D462FC-9E9A-4204-A3B4-5228EBA54D58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27D462FC-9E9A-4204-A3B4-5228EBA54D58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27D462FC-9E9A-4204-A3B4-5228EBA54D58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27D462FC-9E9A-4204-A3B4-5228EBA54D58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -63,6 +60,8 @@ Global
 		{ACD684EA-B542-443F-B4A5-915918EF10DB} = {AF6C0426-7167-41B5-8CEC-0AC1C0EB512A}
 		{73819255-A663-4F8D-B023-A81BB4ED76AE} = {54832E69-FDF4-43B3-A1AB-E2339036AFC1}
 		{F0C4EAF3-9E5D-4011-8FFD-2953D5886C7D} = {27648360-8EAC-4A61-B53C-6D06E8CFDD61}
+		{DD30251E-8924-4130-9FBB-9726B27DEC83} = {F793DE6D-489E-4586-89A8-15438C0AFC4F}
+		{27D462FC-9E9A-4204-A3B4-5228EBA54D58} = {DD30251E-8924-4130-9FBB-9726B27DEC83}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C309A467-9C56-41A5-B6C2-96D5C587825C}

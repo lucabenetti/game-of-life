@@ -9,3 +9,7 @@
 /src/GameOfLife.API/bin/Debug/net7.0
 /src/GameOfLife.Tests/bin/Debug/net7.0
 /src/GameOfLife.Tests/obj
+/src/GameOfLife.API/bin/Release/net7.0
+/src/GameOfLife.Tests/bin/Release/net7.0
+/src/GameOfLife.Benchmark/obj
+/src/GameOfLife.Benchmark/bin
